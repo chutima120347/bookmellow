@@ -1,57 +1,96 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
-import { booksData } from '../data/data';
+import { apiRequest } from '../services/api';
+import BookCover from '../components/BookCover';
 
 function AdminDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('books'); // 'books' | 'members'
-  const [booksList, setBooksList] = useState(booksData || []);
+  const [booksList, setBooksList] = useState([]);
+  const [membersList, setMembersList] = useState([]);
+  const [stats, setStats] = useState({ books: 0, members: 0, admins: 0 });
   const [searchTerm, setSearchTerm] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
 
-  // ข้อมูล Mockup สำหรับจัดการสมาชิก (GET /api/admin/members)
-  const [membersList, setMembersList] = useState([
-    { id: 1, name: 'มิลค์ สายอ่าน', email: 'milk@example.com', role: 'User', joined: '01 พ.ย. 2026' },
-    { id: 2, name: 'Admin Master', email: 'admin@bookmellow.com', role: 'Admin', joined: '15 ต.ค. 2026' },
-    { id: 3, name: 'แมวน้ำปุกปุย', email: 'seal@example.com', role: 'User', joined: '05 พ.ย. 2026' },
-  ]);
+  // ดึงข้อมูล Dashboard Stats, Books และ Members
+  useEffect(() => {
+    async function fetchAdminData() {
+      try {
+        setIsLoading(true);
+        // 1. ดึงข้อมูลสถิติภาพรวม (GET /api/admin/dashboard)
+        const statsRes = await apiRequest('/api/admin/dashboard');
+        setStats(statsRes || { books: 0, members: 0, admins: 0 });
+
+        // 2. ดึงรายการหนังสือ (GET /api/admin/books)
+        const booksRes = await apiRequest('/api/admin/books');
+        setBooksList(booksRes.data || []);
+
+        // 3. ดึงรายการสมาชิก (GET /api/admin/members)
+        const membersRes = await apiRequest('/api/admin/members');
+        setMembersList(membersRes.data || []);
+      } catch (err) {
+        console.error('Failed to load admin data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchAdminData();
+  }, []);
 
   // ฟิลเตอร์ค้นหาหนังสือ
   const filteredBooks = booksList.filter((book) =>
     book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    book.author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (book.categoryName || book.category || '').toLowerCase().includes(searchTerm.toLowerCase())
+    book.author?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // ฟิลเตอร์ค้นหาสมาชิก
   const filteredMembers = membersList.filter((m) =>
-    m.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    m.email.toLowerCase().includes(searchTerm.toLowerCase())
+    m.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    m.email?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   // การลบหนังสือ (DELETE /api/admin/books/{id})
-  const handleDeleteBook = (id, title) => {
+  const handleDeleteBook = async (id, title) => {
     if (window.confirm(`คุณต้องการลบหนังสือเรื่อง "${title}" ใช่หรือไม่?`)) {
-      setBooksList(booksList.filter((b) => b.id !== id));
+      try {
+        await apiRequest(`/api/admin/books/${id}`, { method: 'DELETE' });
+        setBooksList(booksList.filter((b) => b.id !== id));
+        alert('ลบหนังสือเรียบร้อยแล้วค่ะ');
+      } catch (err) {
+        alert(err.message || 'ไม่สามารถลบหนังสือได้');
+      }
     }
   };
 
   // เปลี่ยนสิทธิ์สมาชิก (PUT /api/admin/members/{id}/role)
-  const handleToggleRole = (id) => {
-    setMembersList(membersList.map((m) => {
-      if (m.id === id) {
-        const newRole = m.role === 'Admin' ? 'User' : 'Admin';
-        return { ...m, role: newRole };
-      }
-      return m;
-    }));
+  const handleToggleRole = async (memberId, currentRole) => {
+    const newRole = currentRole === 'admin' ? 'member' : 'admin';
+    try {
+      await apiRequest(`/api/admin/members/${memberId}/role`, {
+        method: 'PUT',
+        body: JSON.stringify({ role: newRole }),
+      });
+      setMembersList(
+        membersList.map((m) => (m.id === memberId ? { ...m, role: newRole } : m))
+      );
+      alert('อัปเดตสิทธิ์สมาชิกเรียบร้อยแล้ว');
+    } catch (err) {
+      alert(err.message || 'ไม่สามารถเปลี่ยนสิทธิ์สมาชิกได้');
+    }
   };
 
   // ลบสมาชิก (DELETE /api/admin/members/{id})
-  const handleDeleteMember = (id, name) => {
-    if (window.confirm(`คุณต้องการลบบัญชีผู้ใช้ "${name}" ใช่หรือไม่?`)) {
-      setMembersList(membersList.filter((m) => m.id !== id));
+  const handleDeleteMember = async (id, username) => {
+    if (window.confirm(`คุณต้องการลบบัญชีผู้ใช้ "${username}" ใช่หรือไม่?`)) {
+      try {
+        await apiRequest(`/api/admin/members/${id}`, { method: 'DELETE' });
+        setMembersList(membersList.filter((m) => m.id !== id));
+        alert('ลบบัญชีผู้ใช้เรียบร้อยแล้ว');
+      } catch (err) {
+        alert(err.message || 'ไม่สามารถลบสมาชิกได้');
+      }
     }
   };
 
@@ -81,45 +120,36 @@ function AdminDashboard() {
         </div>
 
         {/* Overview Widgets */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
           <div className="bg-white p-5 rounded-3xl border border-pink-100 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-pink-500">
               <span className="text-xs font-semibold">หนังสือทั้งหมด</span>
               <span className="text-lg">📚</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold">{booksList.length}</p>
-            <p className="text-[10px] text-slate-400">รายการพร้อมใช้งาน</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.books}</p>
+            <p className="text-[10px] text-slate-400">รายการในระบบ</p>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-pink-100 shadow-sm space-y-2">
+          <div className="bg-[#FAF7F0] p-5 rounded-3xl border border-purple-100 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-purple-500">
-              <span className="text-xs font-semibold">สมาชิกในระบบ</span>
+              <span className="text-xs font-semibold">สมาชิก (Members)</span>
               <span className="text-lg">👥</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold">{membersList.length}</p>
-            <p className="text-[10px] text-slate-400">นักอ่านที่ลงทะเบียน</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.members}</p>
+            <p className="text-[10px] text-slate-400">ผู้ใช้งานทั่วไป</p>
           </div>
 
-          <div className="bg-white p-5 rounded-3xl border border-pink-100 shadow-sm space-y-2">
+          <div className="bg-[#FAF7F0] p-5 rounded-3xl border border-amber-100 shadow-sm space-y-2">
             <div className="flex items-center justify-between text-amber-500">
-              <span className="text-xs font-semibold">รีวิวทั้งหมด</span>
-              <span className="text-lg">💬</span>
+              <span className="text-xs font-semibold">ผู้ดูแลระบบ (Admins)</span>
+              <span className="text-lg">👑</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold">905</p>
-            <p className="text-[10px] text-slate-400">ความคิดเห็นจากผู้ใช้</p>
-          </div>
-
-          <div className="bg-white p-5 rounded-3xl border border-pink-100 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-emerald-500">
-              <span className="text-xs font-semibold">คะแนนเฉลี่ยรวม</span>
-              <span className="text-lg">⭐</span>
-            </div>
-            <p className="text-2xl sm:text-3xl font-bold">4.8</p>
-            <p className="text-[10px] text-slate-400">จากคะแนนเต็ม 5.0</p>
+            <p className="text-2xl sm:text-3xl font-bold">{stats.admins}</p>
+            <p className="text-[10px] text-slate-400">ผู้ดูแลระบบทั้งหมด</p>
           </div>
         </div>
 
-        {/* Section Navigation Tabs */}
+        {/* Navigation Tabs */}
         <div className="flex gap-3 border-b border-pink-100 pb-2">
           <button
             onClick={() => setActiveTab('books')}
@@ -156,108 +186,106 @@ function AdminDashboard() {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder={activeTab === 'books' ? "ค้นหาชื่อหนังสือ / ผู้แต่ง..." : "ค้นหาชื่อ / อีเมลสมาชิก..."}
+                placeholder={activeTab === 'books' ? "ค้นหาชื่อหนังสือ / ผู้แต่ง..." : "ค้นหาชื่อ / อีเมล..."}
                 className="w-full px-3 py-1.5 pl-8 bg-[#FAF7F0] border border-pink-200 rounded-xl text-xs focus:outline-none"
               />
               <span className="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
             </div>
           </div>
 
-          {/* Table Books */}
-          {activeTab === 'books' && (
+          {isLoading ? (
+            <div className="text-center py-12 text-slate-400 text-xs">กำลังโหลดข้อมูล...</div>
+          ) : activeTab === 'books' ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#FAF7F0] text-slate-500 font-semibold border-b border-pink-100">
                   <tr>
                     <th className="p-3 rounded-l-xl">หนังสือ</th>
                     <th className="p-3">หมวดหมู่</th>
-                    <th className="p-3">สำนักพิมพ์</th>
-                    <th className="p-3">คะแนน</th>
+                    <th className="p-3">ปีที่พิมพ์</th>
                     <th className="p-3 text-right rounded-r-xl">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-pink-50">
-                  {filteredBooks.map((book) => (
-                    <tr key={book.id} className="hover:bg-pink-50/40 transition">
-                      <td className="p-3">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={book.cover}
-                            alt={book.title}
-                            className="w-10 h-13 object-cover rounded-lg flex-shrink-0 shadow-sm"
-                          />
-                          <div>
-                            <p className="font-bold text-[#4A3E3D]">{book.title}</p>
-                            <p className="text-[10px] text-slate-400">ผู้แต่ง: {book.author}</p>
+                  {filteredBooks.map((book) => {
+                    const categoryBadge = Array.isArray(book.categories) && book.categories.length > 0
+                      ? book.categories.join(', ')
+                      : 'ทั่วไป';
+
+                    return (
+                      <tr key={book.id} className="hover:bg-pink-50/40 transition">
+                        <td className="p-3">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-13 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
+                              <BookCover src={book.cover_url} title={book.title} />
+                            </div>
+                            <div>
+                              <p className="font-bold text-[#4A3E3D]">{book.title}</p>
+                              <p className="text-[10px] text-slate-400">ผู้แต่ง: {book.author}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="p-3">
-                        <span className="px-2.5 py-1 bg-pink-50 text-pink-500 rounded-full border border-pink-100 text-[10px] font-semibold">
-                          {book.categoryName || book.category}
-                        </span>
-                      </td>
-                      <td className="p-3 text-slate-500">{book.publisher || 'BookMellow'}</td>
-                      <td className="p-3 font-bold text-amber-500">⭐ {book.rating}</td>
-                      <td className="p-3 text-right space-x-2">
-                        <button
-                          onClick={() => navigate(`/admin/manage-books?edit=${book.id}`)}
-                          className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg font-semibold hover:bg-amber-200 transition"
-                        >
-                          แก้ไข
-                        </button>
-                        <button
-                          onClick={() => handleDeleteBook(book.id, book.title)}
-                          className="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 transition"
-                        >
-                          ลบ
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="p-3">
+                          <span className="px-2.5 py-1 bg-pink-50 text-pink-500 rounded-full border border-pink-100 text-[10px] font-semibold">
+                            {categoryBadge}
+                          </span>
+                        </td>
+                        <td className="p-3 text-slate-500">{book.published_year || '-'}</td>
+                        <td className="p-3 text-right space-x-2">
+                          <button
+                            onClick={() => navigate(`/admin/manage-books?edit=${book.id}`)}
+                            className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg font-semibold hover:bg-amber-200 transition"
+                          >
+                            แก้ไข
+                          </button>
+                          <button
+                            onClick={() => handleDeleteBook(book.id, book.title)}
+                            className="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 transition"
+                          >
+                            ลบ
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
-          )}
-
-          {/* Table Members */}
-          {activeTab === 'members' && (
+          ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead className="bg-[#FAF7F0] text-slate-500 font-semibold border-b border-pink-100">
                   <tr>
-                    <th className="p-3 rounded-l-xl">สมาชิก</th>
+                    <th className="p-3 rounded-l-xl">ชื่อผู้ใช้</th>
                     <th className="p-3">อีเมล</th>
-                    <th className="p-3">สิทธิ์ใช้งาน</th>
-                    <th className="p-3">วันที่สมัคร</th>
+                    <th className="p-3">สิทธิ์</th>
                     <th className="p-3 text-right rounded-r-xl">จัดการ</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-pink-50">
-                  {filteredMembers.map((member) => (
-                    <tr key={member.id} className="hover:bg-pink-50/40 transition">
-                      <td className="p-3 font-bold text-[#4A3E3D]">{member.name}</td>
-                      <td className="p-3 text-slate-500">{member.email}</td>
+                  {filteredMembers.map((m) => (
+                    <tr key={m.id} className="hover:bg-pink-50/40 transition">
+                      <td className="p-3 font-bold text-[#4A3E3D]">{m.username}</td>
+                      <td className="p-3 text-slate-500">{m.email}</td>
                       <td className="p-3">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${
-                          member.role === 'Admin' ? 'bg-purple-100 text-purple-600 border border-purple-200' : 'bg-slate-100 text-slate-600'
+                          m.role === 'admin' ? 'bg-purple-100 text-purple-600 border border-purple-200' : 'bg-slate-100 text-slate-600'
                         }`}>
-                          {member.role === 'Admin' ? '👑 Admin' : '👤 User'}
+                          {m.role === 'admin' ? '👑 Admin' : '👤 Member'}
                         </span>
                       </td>
-                      <td className="p-3 text-slate-400 text-[10px]">{member.joined}</td>
                       <td className="p-3 text-right space-x-2">
                         <button
-                          onClick={() => handleToggleRole(member.id)}
+                          onClick={() => handleToggleRole(m.id, m.role)}
                           className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 transition"
                         >
                           เปลี่ยนสิทธิ์
                         </button>
                         <button
-                          onClick={() => handleDeleteMember(member.id, member.name)}
+                          onClick={() => handleDeleteMember(m.id, m.username)}
                           className="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 transition"
                         >
-                          ลบผู้ใช้
+                          ลบ
                         </button>
                       </td>
                     </tr>
@@ -273,5 +301,4 @@ function AdminDashboard() {
     </div>
   );
 }
-
 export default AdminDashboard;

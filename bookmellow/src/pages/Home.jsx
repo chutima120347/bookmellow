@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
 import { booksData } from '../data/data';
+import BookCover from '../components/BookCover';
 
 const categoryOptions = [
   { id: 'all', label: 'ทั้งหมด' },
@@ -32,7 +33,12 @@ function Home() {
   const safeBooksData = Array.isArray(booksData) ? booksData : [];
 
   const filteredBooks = safeBooksData.filter((book) => {
-    const matchesCategory = selectedCategory === 'all' || book.category === selectedCategory;
+    // Backend ส่ง categories เป็น Array
+    const bookCategories = Array.isArray(book.categories) 
+      ? book.categories 
+      : [book.category || ''];
+
+    const matchesCategory = selectedCategory === 'all' || bookCategories.includes(selectedCategory);
     const matchesSearch = 
       book.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       book.author?.toLowerCase().includes(searchQuery.toLowerCase());
@@ -61,19 +67,6 @@ function Home() {
             </div>
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight">วันนี้อยากอ่านเรื่องไหนดีนะ?</h1>
             <p className="text-sm sm:text-base text-slate-500 leading-relaxed">ค้นพบหนังสือและเรื่องราวสุดประทับใจที่เหมาะกับอารมณ์ของคุณวันนี้ ระบบจะช่วยแนะนำหนังสือที่ตรงใจที่สุดให้อ่านแบบเพลิดเพลิน!</p>
-            <div className="pt-2 flex flex-wrap gap-3">
-              <button 
-                onClick={() => {
-                  if (safeBooksData.length > 0) {
-                    const randomBook = safeBooksData[Math.floor(Math.random() * safeBooksData.length)];
-                    alert(`สุ่มหนังสือแนะนำได้เรื่อง: ${randomBook.title}`);
-                  }
-                }}
-                className="px-6 py-3 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white rounded-full text-sm font-medium shadow-md transition-all"
-              >
-                🎲 สุ่มหนังสือฮีลใจให้ฉันที!
-              </button>
-            </div>
           </div>
         </section>
 
@@ -118,6 +111,11 @@ function Home() {
             {filteredBooks.length > 0 ? (
               filteredBooks.map((book) => {
                 const isFav = favorites.includes(book.id);
+                // ดึงหมวดหมู่แรกมาแสดงใน Badge
+                const firstCategory = Array.isArray(book.categories) && book.categories.length > 0 
+                  ? book.categories[0] 
+                  : (book.category || 'ทั่วไป');
+
                 return (
                   <div 
                     key={book.id} 
@@ -126,9 +124,11 @@ function Home() {
                   >
                     <div className="space-y-3">
                       <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#FAF7F0]">
-                        <img src={book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
-                        <span className={`absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 ${book.badgeColor || 'bg-pink-100 text-pink-600'}`}>
-                          {book.badge || book.categoryName || book.category}
+                        {/* ✅ ใช้ BookCover ร่วมกับ cover_url */}
+                        <BookCover src={book.cover_url || book.cover} title={book.title} />
+                        
+                        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-pink-600 bg-pink-100">
+                          {firstCategory}
                         </span>
                         <button
                           onClick={(e) => toggleFavorite(e, book.id)}
@@ -139,10 +139,6 @@ function Home() {
                       </div>
 
                       <div>
-                        <div className="flex items-center gap-1 text-amber-500 text-xs font-bold">
-                          ⭐ <span>{book.rating}</span>
-                          <span className="text-slate-400 font-normal">({book.reviewsCount})</span>
-                        </div>
                         <h3 className="font-bold text-sm truncate mt-1">{book.title}</h3>
                         <p className="text-xs text-slate-400 truncate">ผู้แต่ง: {book.author}</p>
                       </div>
@@ -150,7 +146,7 @@ function Home() {
 
                     <div className="pt-3 border-t border-pink-50 mt-3 flex items-center justify-between">
                       <span className="text-[10px] text-pink-500 bg-pink-50 px-2 py-0.5 rounded-full truncate max-w-[110px]">
-                        {book.recommendReason || 'แนะนำสำหรับคุณ'}
+                        {book.reason || book.description || 'แนะนำสำหรับคุณ'}
                       </span>
                       <span className="text-xs font-semibold text-pink-500 group-hover:underline flex-shrink-0">
                         รายละเอียด &gt;
@@ -172,4 +168,5 @@ function Home() {
     </div>
   );
 }
+
 export default Home;

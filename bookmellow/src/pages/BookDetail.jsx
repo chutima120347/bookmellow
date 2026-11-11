@@ -1,42 +1,90 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { booksData } from '../data/data';
+import { apiRequest } from '../services/api';
+import BookCover from '../components/BookCover';
 
 function BookDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
 
-  const safeBooksData = Array.isArray(booksData) ? booksData : [];
-  const book = safeBooksData.find((b) => b.id === Number(id)) || safeBooksData[0] || {};
-
+  const [book, setBook] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [userRating, setUserRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
-  const [reviewsList, setReviewsList] = useState([
-    {
-      id: 1,
-      user: 'คุณแมวน้ำปุกปุย',
-      avatar: '🐱',
-      rating: 5,
-      comment: 'อ่านแล้วอบอุ่นหัวใจมากกก! ฟีลกู๊ดสุดๆ ตัวละครน่ารักทุกตัวเลยค่ะ 🌸',
-      date: '10 พ.ย. 2026',
-    },
-  ]);
+  const [reviewsList, setReviewsList] = useState([]);
 
-  const handleToggleFavorite = () => {
+  // ดึงข้อมูลรายละเอียดหนังสือ และสถานะรายการโปรด
+  useEffect(() => {
+    async function loadBookData() {
+      try {
+        setIsLoading(true);
+        // 1. ดึงรายละเอียดหนังสือ (GET /api/books/{id})
+        const bookRes = await apiRequest(`/api/books/${id}`);
+        setBook(bookRes.data || bookRes);
+
+        // 2. ดึงรีวิวของหนังสือ (GET /api/books/{id}/reviews)
+        try {
+          const reviewRes = await apiRequest(`/api/books/${id}/reviews`);
+          setReviewsList(reviewRes.reviews || []);
+        } catch (err) {
+          console.error('Failed to load reviews:', err);
+        }
+
+        // 3. ตรวจสอบว่าเล่มนี้อยู่ในรายการโปรดหรือไม่ (ถ้าล็อกอินอยู่)
+        if (isLoggedIn) {
+          try {
+            const favRes = await apiRequest('/api/me/favorites');
+            const favs = favRes.data || [];
+            setIsFavorite(favs.some((b) => String(b.id) === String(id)));
+          } catch (err) {
+            console.error('Failed to check favorites:', err);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to load book detail:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    if (id) {
+      loadBookData();
+    }
+  }, [id, isLoggedIn]);
+
+  // สลับสถานะเพิ่ม/ลบรายการโปรด
+  const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
       setShowAuthModal(true);
       return;
     }
-    setIsFavorite(!isFavorite);
+
+    try {
+      if (isFavorite) {
+        // DELETE /api/me/favorites/{book_id}
+        await apiRequest(`/api/me/favorites/${book.id}`, { method: 'DELETE' });
+        setIsFavorite(false);
+      } else {
+        // POST /api/me/favorites -> Payload: { book_id: book.id }
+        await apiRequest('/api/me/favorites', {
+          method: 'POST',
+          body: JSON.stringify({ book_id: book.id }),
+        });
+        setIsFavorite(true);
+      }
+    } catch (err) {
+      alert(err.message || 'เกิดข้อผิดพลาดในการอัปเดตรายการโปรด');
+    }
   };
 
-  const handleSubmitReview = (e) => {
+  // ส่งรีวิวใหม่ (POST /api/books/{id}/reviews)
+  const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
       setShowAuthModal(true);
@@ -44,19 +92,57 @@ function BookDetail() {
     }
     if (!reviewComment.trim()) return;
 
-    const newReview = {
-      id: Date.now(),
-      user: 'คุณ (นักอ่าน)',
-      avatar: '🌸',
-      rating: userRating,
-      comment: reviewComment,
-      date: 'วันนี้',
-    };
+    try {
+      const res = await apiRequest(`/api/books/${id}/reviews`, {
+        method: 'POST',
+        body: JSON.stringify({
+          rating: userRating,
+          comment: reviewComment,
+        }),
+      });
 
-    setReviewsList([newReview, ...reviewsList]);
-    setReviewComment('');
-    alert('ขอบคุณสำหรับรีวิวสุดคิ้วท์น้า! 🌸');
+      const newReview = res.review || {
+        id: Date.now(),
+        user_id: 'me',
+        username: 'คุณ (นักอ่าน)',
+        rating: userRating,
+        comment: reviewComment,
+        created_at: new Date().toISOString(),
+      };
+
+      setReviewsList([newReview, ...reviewsList]);
+      setReviewComment('');
+      alert('ขอบคุณสำหรับรีวิวสุดคิ้วท์น้า! 🌸');
+    } catch (err) {
+      alert(err.message || 'ไม่สามารถส่งรีวิวได้');
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#FAF7F0] flex items-center justify-center text-xs text-slate-400">
+        กำลังโหลดข้อมูลหนังสือ...
+      </div>
+    );
+  }
+
+  if (!book) {
+    return (
+      <div className="min-h-screen bg-[#FAF7F0] flex flex-col items-center justify-center space-y-4 text-[#4A3E3D]">
+        <p className="text-sm font-bold">ไม่พบข้อมูลหนังสือเล่มนี้</p>
+        <button
+          onClick={() => navigate('/explore')}
+          className="px-4 py-2 bg-[#FF9EAA] text-white rounded-full text-xs font-semibold"
+        >
+          กลับไปเลือกค้นหาหนังสือ
+        </button>
+      </div>
+    );
+  }
+
+  const categoryText = Array.isArray(book.categories) && book.categories.length > 0
+    ? book.categories.join(', ')
+    : (book.category || 'ทั่วไป');
 
   return (
     <div className="min-h-screen bg-[#FAF7F0] text-[#4A3E3D]">
@@ -66,9 +152,10 @@ function BookDetail() {
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm grid md:grid-cols-3 gap-8">
           <div className="flex flex-col items-center">
             <div className="relative w-full max-w-[240px] aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-[#FAF7F0]">
-              <img src={book.cover} alt={book.title} className="w-full h-full object-cover" />
-              <span className={`absolute top-3 left-3 text-xs font-semibold px-3 py-1 rounded-full border bg-white/90 backdrop-blur-md ${book.badgeColor || 'bg-pink-100 text-pink-600'}`}>
-                {book.categoryName || book.category}
+              <BookCover src={book.cover_url || book.cover} title={book.title} />
+              
+              <span className="absolute top-3 left-3 text-xs font-semibold px-3 py-1 rounded-full border bg-white/90 backdrop-blur-md bg-pink-100 text-pink-600">
+                {Array.isArray(book.categories) && book.categories.length > 0 ? book.categories[0] : categoryText}
               </span>
             </div>
 
@@ -87,30 +174,26 @@ function BookDetail() {
           <div className="md:col-span-2 space-y-4">
             <div>
               <span className="text-xs px-3 py-1 bg-pink-50 text-pink-500 rounded-full border border-pink-100 font-semibold">
-                หมวดหมู่: {book.categoryName || book.category}
+                หมวดหมู่: {categoryText}
               </span>
               <h1 className="text-2xl sm:text-3xl font-bold mt-2">{book.title}</h1>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                โดย <span className="text-slate-600 font-medium">{book.author}</span> | สำนักพิมพ์: <span className="text-slate-600 font-medium">{book.publisher || 'BookMellow'}</span>
+                โดย <span className="text-slate-600 font-medium">{book.author}</span>
+                {book.published_year && ` | ปีที่พิมพ์: ${book.published_year}`}
               </p>
-            </div>
-
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-amber-500 font-bold text-base">⭐ {book.rating}</span>
-              <span className="text-slate-400 text-xs">({book.reviewsCount || reviewsList.length} รีวิวจากผู้ใช้)</span>
             </div>
 
             <div className="bg-[#FAF7F0] p-4 rounded-2xl border border-pink-100">
               <h4 className="font-bold text-xs text-pink-500 flex items-center gap-1 mb-1">
                 <span>🎯</span> เหตุผลที่แนะนำสำหรับคุณ
               </h4>
-              <p className="text-xs text-slate-600">{book.recommendReason || 'หนังสือฮีลใจยอดนิยม'}</p>
+              <p className="text-xs text-slate-600">{book.reason || 'หนังสือฮีลใจยอดนิยม'}</p>
             </div>
 
             <div>
               <h3 className="font-bold text-sm mb-1">เรื่องย่อ</h3>
               <p className="text-xs sm:text-sm text-slate-500 leading-relaxed bg-white p-3 rounded-xl border border-gray-100">
-                {book.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'}
+                {book.description || book.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'}
               </p>
             </div>
           </div>
@@ -161,25 +244,31 @@ function BookDetail() {
           </div>
 
           <div className="space-y-3">
-            {reviewsList.map((rev) => (
-              <div key={rev.id} className="p-4 rounded-2xl bg-[#FAF7F0]/50 border border-pink-100/60 space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs">
-                      {rev.avatar}
+            {reviewsList.length > 0 ? (
+              reviewsList.map((rev) => (
+                <div key={rev.id} className="p-4 rounded-2xl bg-[#FAF7F0]/50 border border-pink-100/60 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs">
+                        🌸
+                      </div>
+                      <div>
+                        <h5 className="text-xs font-bold">{rev.username || rev.user || 'นักอ่าน'}</h5>
+                        <span className="text-[10px] text-slate-400">
+                          {rev.created_at ? new Date(rev.created_at).toLocaleDateString('th-TH') : (rev.date || 'วันนี้')}
+                        </span>
+                      </div>
                     </div>
-                    <div>
-                      <h5 className="text-xs font-bold">{rev.user}</h5>
-                      <span className="text-[10px] text-slate-400">{rev.date}</span>
+                    <div className="text-amber-400 text-xs font-bold">
+                      {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)} ({rev.rating}.0)
                     </div>
                   </div>
-                  <div className="text-amber-400 text-xs font-bold">
-                    {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)} ({rev.rating}.0)
-                  </div>
+                  <p className="text-xs text-slate-600 leading-relaxed">"{rev.comment}"</p>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">"{rev.comment}"</p>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-center text-xs text-slate-400 py-4">ยังไม่มีรีวิวสำหรับหนังสือเล่มนี้ มารีวิวเป็นคนแรกกันนะ! 🌸</p>
+            )}
           </div>
         </section>
       </main>
@@ -196,6 +285,7 @@ function BookDetail() {
           </div>
         </div>
       )}
+
       <Footer />
     </div>
   );

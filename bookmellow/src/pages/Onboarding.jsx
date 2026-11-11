@@ -1,88 +1,94 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-
-const allCategories = [
-  { id: 'Fantasy', label: 'Fantasy' },
-  { id: 'Romance', label: 'Romance' },
-  { id: 'Mystery', label: 'Mystery' },
-  { id: 'Science Fiction', label: 'Science Fiction' },
-  { id: 'Thriller', label: 'Thriller' },
-  { id: 'Horror', label: 'Horror' },
-  { id: 'Historical Fiction', label: 'Historical Fiction' },
-  { id: 'Self Help', label: 'Self Help' },
-  { id: 'Business', label: 'Business' },
-  { id: 'Education', label: 'Education' },
-  { id: 'Biography', label: 'Biography' },
-  { id: 'Young Adult', label: 'Young Adult' },
-  { id: 'Children', label: 'Children' },
-  { id: 'Poetry', label: 'Poetry' },
-  { id: 'Adventure', label: 'Adventure' }
-];
+import { apiRequest } from '../services/api';
 
 function Onboarding() {
-  // ดึงค่าที่เคยเลือกไว้จาก localStorage (ถ้ามี)
-  const savedInterests = JSON.parse(localStorage.getItem('user_interests')) || [];
-  const [selectedCategories, setSelectedCategories] = useState(savedInterests);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
-  const toggleCategory = (id) => {
-    if (selectedCategories.includes(id)) {
-      setSelectedCategories(selectedCategories.filter((c) => c !== id));
+  useEffect(() => {
+    async function loadData() {
+      try {
+        // 1. ดึงหมวดหมู่ทั้งหมด
+        const catRes = await apiRequest('/api/categories');
+        setCategories(catRes.data || []);
+
+        // 2. ดึง Preferences ปัจจุบัน
+        const prefRes = await apiRequest('/api/me/preferences');
+        if (prefRes.data) {
+          setSelectedCategoryIds(prefRes.data.map((c) => c.id));
+        }
+      } catch (err) {
+        console.error('Failed to fetch data:', err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadData();
+  }, []);
+
+  const toggleCategory = (catId) => {
+    if (selectedCategoryIds.includes(catId)) {
+      setSelectedCategoryIds(selectedCategoryIds.filter((id) => id !== catId));
     } else {
-      setSelectedCategories([...selectedCategories, id]);
+      setSelectedCategoryIds([...selectedCategoryIds, catId]);
     }
   };
 
-  const handleSave = () => {
-    localStorage.setItem('user_interests', JSON.stringify(selectedCategories));
-    alert('บันทึกความสนใจเรียบร้อยแล้ว! 🌸');
-    navigate('/');
+  const handleSavePreferences = async () => {
+    try {
+      // 3. ส่ง Payload เป็น category_ids Array ของ Category UUID
+      await apiRequest('/api/me/preferences', {
+        method: 'PUT',
+        body: JSON.stringify({ category_ids: selectedCategoryIds }),
+      });
+      alert('บันทึกความสนใจเรียบร้อยแล้วค่ะ! 🌸');
+      navigate('/');
+    } catch (err) {
+      alert(err.message || 'บันทึกข้อมูลไม่สำเร็จ');
+    }
   };
 
+  if (isLoading) {
+    return <div className="min-h-screen bg-[#FAF7F0] flex items-center justify-center text-xs text-slate-400">กำลังโหลด...</div>;
+  }
+
   return (
-    <div className="min-h-screen bg-[#FAF7F0] text-[#4A3E3D]">
-      <Navbar />
+    <div className="min-h-screen bg-[#FAF7F0] p-6 max-w-2xl mx-auto space-y-6 text-[#4A3E3D]">
+      <div className="text-center space-y-2">
+        <h1 className="text-2xl font-bold">🎯 เลือกหมวดหมู่หนังสือที่คุณสนใจ</h1>
+        <p className="text-xs text-slate-400">ระบบจะนำหมวดหมู่นี้ไปจัดหนังสือแนะนำฮีลใจให้คุณ</p>
+      </div>
 
-      <main className="max-w-2xl mx-auto px-4 py-10">
-        <div className="bg-white rounded-3xl p-8 border border-pink-100 shadow-sm text-center space-y-6">
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold">เลือกหมวดหมู่ตามความสนใจ</h1>
-            <p className="text-xs text-slate-400">
-              เลือกหมวดหมู่หนังสือที่คุณชอบเพื่อรับคำแนะนำที่ตรงใจ (เลือกได้หลายหมวดหมู่ และกลับมาแก้ไขได้ตลอดเวลา)
-            </p>
-          </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        {categories.map((cat) => {
+          const isSelected = selectedCategoryIds.includes(cat.id);
+          return (
+            <button
+              key={cat.id}
+              onClick={() => toggleCategory(cat.id)}
+              className={`p-3 rounded-2xl text-xs font-semibold border transition ${
+                isSelected
+                  ? 'bg-[#FF9EAA] text-white border-[#FF9EAA] shadow-sm'
+                  : 'bg-white text-slate-600 border-pink-100 hover:bg-pink-50'
+              }`}
+            >
+              {cat.name}
+            </button>
+          );
+        })}
+      </div>
 
-          {/* รายการหมวดหมู่ปุ่มกดเลือก */}
-          <div className="flex flex-wrap justify-center gap-3 py-4">
-            {allCategories.map((cat) => {
-              const isSelected = selectedCategories.includes(cat.id);
-              return (
-                <button
-                  key={cat.id}
-                  onClick={() => toggleCategory(cat.id)}
-                  className={`px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-semibold border transition-all flex items-center gap-2 ${
-                    isSelected
-                      ? 'bg-[#FF9EAA] text-white border-[#FF9EAA] shadow-sm scale-105'
-                      : 'bg-[#FAF7F0] text-[#4A3E3D] border-pink-100 hover:bg-pink-50'
-                  }`}
-                >
-                  <span>{cat.label}</span>
-                  {isSelected && <span>✓</span>}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* ปุ่มบันทึกความสนใจ */}
-          <button
-            onClick={handleSave}
-            className="w-full py-3 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white font-bold rounded-xl text-xs sm:text-sm shadow-md transition">
-            บันทึกความสนใจ ({selectedCategories.length} หมวดหมู่)
-          </button>
-        </div>
-      </main>
+      <button
+        onClick={handleSavePreferences}
+        className="w-full py-3 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white font-bold text-xs rounded-2xl shadow-md"
+      >
+        บันทึกและเริ่มต้นใช้งาน 🌸
+      </button>
     </div>
   );
 }
+
 export default Onboarding;
