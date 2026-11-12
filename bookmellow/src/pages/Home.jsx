@@ -34,13 +34,12 @@ function Home() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  // 1. ดึงข้อมูลหนังสือจาก Backend ทันทีที่เปิดหน้า Home
   useEffect(() => {
     const fetchBooks = async () => {
       try {
         setLoading(true);
         const data = await apiRequest('/api/books');
-        const booksList = Array.isArray(data) ? data : (data.books || data.data || []);
+        const booksList = Array.isArray(data) ? data : (data?.books || data?.data || []);
         setBooks(booksList);
       } catch (error) {
         console.error('ดึงข้อมูลหนังสือไม่สำเร็จ:', error);
@@ -52,7 +51,6 @@ function Home() {
     fetchBooks();
   }, []);
 
-  // 2. ดึงรายการโปรดของผู้ใช้ที่ล็อกอินอยู่
   useEffect(() => {
     if (!isLoggedIn) {
       setFavorites([]);
@@ -64,15 +62,14 @@ function Home() {
         const res = await apiRequest('/api/favorites');
         const favList = Array.isArray(res) ? res : (res?.data || res?.favorites || []);
         setFavorites(favList.map((item) => item.book_id || item.id));
-      } catch (err) {
-        console.error('ดึงรายการโปรดไม่สำเร็จ:', err);
+      } catch {
+        setFavorites([]);
       }
     };
 
     fetchFavorites();
   }, [isLoggedIn]);
 
-  // เพิ่ม / ลบ รายการโปรด
   const toggleFavorite = async (e, bookId) => {
     e.stopPropagation();
     if (!isLoggedIn) {
@@ -98,7 +95,6 @@ function Home() {
     }
   };
 
-  // กรองหนังสือตามหมวดหมู่
   const filteredBooks = books.filter((book) => {
     const bookCategories = Array.isArray(book.categories)
       ? book.categories
@@ -122,12 +118,18 @@ function Home() {
             <p className="text-sm sm:text-base text-[#E8DCC4] leading-relaxed">
               ค้นพบหนังสือและเรื่องราวสุดประทับใจที่เหมาะกับคุณวันนี้
             </p>
-            <div className="pt-2">
+            <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => navigate('/explore')}
                 className="bg-[#8C533A] hover:bg-[#4A2B1D] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2"
               >
                 เริ่มค้นหาหนังสือ ➔
+              </button>
+              <button
+                onClick={() => navigate('/interests')}
+                className="bg-[#FDFBF7] hover:bg-[#E8DCC4] text-[#4A2B1D] px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2"
+              >
+                ✨ เลือกตามความสนใจ
               </button>
             </div>
           </div>

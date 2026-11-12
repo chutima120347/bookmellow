@@ -12,7 +12,6 @@ import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageBooks from './pages/ManageBooks';
 
-// หน้าแจ้งเตือน 403 เมื่อผู้ใช้ทั่วไปพยายามเข้าถึงหน้า Admin
 function Forbidden403() {
   const navigate = useNavigate();
 
@@ -25,7 +24,7 @@ function Forbidden403() {
           ไม่มีสิทธิ์เข้าถึง
         </h1>
         <p className="text-xs sm:text-sm text-[#7A756E] max-w-md">
-          ขออภัย หน้านี้สงวนสิทธิ์ไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น คุณไม่มีสิทธิ์เข้าถึงเนื้อหาในส่วนนี้
+          ขออภัย หน้านี้สงวนสิทธิ์ไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น
         </p>
         <div className="pt-2">
           <button
@@ -41,7 +40,6 @@ function Forbidden403() {
   );
 }
 
-// ตัวตรวจสอบสิทธิ์ Admin
 function AdminRoute({ children }) {
   const { user, isLoggedIn, isLoading } = useAuth();
 
@@ -63,12 +61,10 @@ function App() {
           <Route path="/book/:id" element={<BookDetail />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/interests" element={<Onboarding />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/favorites" element={<Favorites />} />
-          <Route path="/onboarding" element={<Onboarding />} />
-          <Route path="/interests" element={<Onboarding />} />  
 
-          {/* หน้าสำหรับ Admin เท่านั้น (ไม่ใช่ Admin จะเห็นหน้า 403) */}
           <Route
             path="/admin"
             element={
@@ -90,5 +86,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;
