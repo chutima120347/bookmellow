@@ -144,12 +144,10 @@ function AdminDashboard() {
         {status === 'success' && stats && (
           <div className="space-y-8">
             {/* การ์ดสถิติ 5 ช่อง */}
-            <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <StatCard label="หนังสือ" value={stats.books} to="/admin/manage-books" />
               <StatCard label="สมาชิก" value={stats.members} to="/admin/members" />
               <StatCard label="admin" value={stats.admins} to="/admin/members" />
-              <StatCard label="รีวิว" value={stats.reviews} />
-              <StatCard label="รายการโปรด" value={stats.favorites} />
             </div>
 
             {/* ตาราง 2 คอลัมน์ */}
@@ -182,7 +180,7 @@ function AdminDashboard() {
                             )}
                           </div>
                           <span className="text-sm text-[#4A2B1D]">
-                            ⭐ {rating > 0 ? rating.toFixed(1) : '-'}{' '}
+                            ⭐ {rating > 0 ? rating.toFixed(1) : ' '}{' '}
                             {reviewCount > 0 && (
                               <span className="text-xs text-[#8C7B70]">({reviewCount})</span>
                             )}
