@@ -11,11 +11,8 @@ function Recommendations() {
   const { isLoggedIn } = useAuth();
 
   const [recommendedBooks, setRecommendedBooks] = useState([]);
-  const [userInterests, setUserInterests] = useState([]);
-  const [favorites, setFavorites] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // ดึงความสนใจของผู้ใช้ และหนังสือที่ตรงกับความสนใจ
   useEffect(() => {
     const loadRecommendations = async () => {
       try {
@@ -45,8 +42,6 @@ function Recommendations() {
           }
         }
 
-        setUserInterests(interests);
-
         // 2. ดึงหนังสือทั้งหมดจาก Backend แล้วคัดกรองตามความสนใจ
         const booksRes = await apiRequest('/api/books');
         const allBooks = Array.isArray(booksRes) ? booksRes : (booksRes?.books || booksRes?.data || []);
@@ -63,7 +58,6 @@ function Recommendations() {
           });
           setRecommendedBooks(matched);
         } else {
-          // หากยังไม่เคยเลือกความสนใจ ให้แสดงหนังสือแนะนำทั้งหมด
           setRecommendedBooks(allBooks);
         }
       } catch (err) {
@@ -76,94 +70,24 @@ function Recommendations() {
     loadRecommendations();
   }, [isLoggedIn]);
 
-  // ดึงรายการโปรดของผู้ใช้
-  useEffect(() => {
-    if (!isLoggedIn) {
-      setFavorites([]);
-      return;
-    }
-
-    const fetchFavorites = async () => {
-      try {
-        const res = await apiRequest('/api/favorites');
-        const favList = Array.isArray(res) ? res : (res?.data || res?.favorites || []);
-        setFavorites(favList.map((item) => item.book_id || item.id));
-      } catch {
-        setFavorites([]);
-      }
-    };
-
-    fetchFavorites();
-  }, [isLoggedIn]);
-
-  // เพิ่ม / ลบ รายการโปรด
-  const toggleFavorite = async (e, bookId) => {
-    e.stopPropagation();
-    if (!isLoggedIn) {
-      alert('กรุณาเข้าสู่ระบบก่อนบันทึกรายการโปรดค่ะ');
-      navigate('/auth');
-      return;
-    }
-
-    const isFav = favorites.includes(bookId);
-    try {
-      if (isFav) {
-        await apiRequest(`/api/favorites/${bookId}`, { method: 'DELETE' });
-        setFavorites((prev) => prev.filter((id) => id !== bookId));
-      } else {
-        await apiRequest('/api/favorites', {
-          method: 'POST',
-          body: JSON.stringify({ book_id: bookId }),
-        });
-        setFavorites((prev) => [...prev, bookId]);
-      }
-    } catch (err) {
-      console.error('อัปเดตรายการโปรดไม่สำเร็จ:', err);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#FAF6EE] text-[#3B261C] flex flex-col justify-between font-sans">
       <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        {/* ส่วนหัวข้อ */}
-        <div className="bg-white border border-[#EBE4D8] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-2">
-            <p className="text-xs font-semibold tracking-wider text-[#8C6D5E] uppercase">
-              PERSONALIZED FOR YOU
-            </p>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#3B261C]">
-              หนังสือแนะนำสำหรับคุณ
-            </h1>
-            {userInterests.length > 0 ? (
-              <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-xs text-[#7A6A60]">หมวดหมู่ที่คุณสนใจ:</span>
-                {userInterests.map((interest) => (
-                  <span
-                    key={interest}
-                    className="px-3 py-1 rounded-full text-xs font-semibold bg-[#7A5644] text-white"
-                  >
-                    {interest}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <p className="text-xs sm:text-sm text-[#7A6A60]">
-                คุณยังไม่ได้เลือกหมวดหมู่ที่สนใจ กำลังแสดงหนังสือแนะนำทั้งหมดในระบบ
-              </p>
-            )}
-          </div>
-
-          <button
-            onClick={() => navigate('/interests')}
-            className="px-5 py-2.5 bg-[#FAF6EE] hover:bg-[#EBE4D8] text-[#4A2B1D] border border-[#D8CEBE] rounded-full text-xs font-semibold transition self-start md:self-auto flex-shrink-0"
-          >
-            ⚙️ แก้ไขความสนใจของฉัน
-          </button>
+        {/* ส่วนหัวข้อเรียบง่ายตามภาพตัวอย่าง */}
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#3B261C]">
+            หนังสือที่แนะนำสำหรับคุณ
+          </h1>
+          <p className="text-xs sm:text-sm text-[#7A6A60]">
+            {isLoading
+              ? 'กำลังค้นหาหนังสือที่ตรงกับความสนใจ...'
+              : `พบหนังสือที่ตรงกับความสนใจ ${recommendedBooks.length} เล่ม`}
+          </p>
         </div>
 
-        {/* รายการหนังสือที่คัดสรรมาให้ */}
+        {/* ตารางการ์ดหนังสือ 4 คอลัมน์ */}
         {isLoading ? (
           <div className="text-center py-16 bg-white rounded-3xl border border-[#EBE4D8]">
             <p className="text-[#8C533A] text-sm animate-pulse">
@@ -171,61 +95,74 @@ function Recommendations() {
             </p>
           </div>
         ) : recommendedBooks.length > 0 ? (
-          <div className="space-y-4">
-            <p className="text-xs text-[#7A6A60]">
-              พบหนังสือที่ตรงกับความสนใจของคุณทั้งหมด {recommendedBooks.length} เล่ม
-            </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {recommendedBooks.map((book) => {
+              const bookCategories =
+                Array.isArray(book.categories) && book.categories.length > 0
+                  ? book.categories
+                  : book.category
+                  ? [book.category]
+                  : [];
 
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-              {recommendedBooks.map((book) => {
-                const isFav = favorites.includes(book.id);
-                const firstCategory =
-                  Array.isArray(book.categories) && book.categories.length > 0
-                    ? book.categories[0]
-                    : book.category || 'ทั่วไป';
+              const publishYear =
+                book.published_year || book.publish_year || book.year || '';
 
-                return (
-                  <div
-                    key={book.id}
-                    onClick={() => navigate(`/book/${book.id}`)}
-                    className="group bg-white rounded-2xl p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
-                  >
-                    <div className="space-y-3">
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
-                        <BookCover src={book.cover_url || book.cover} title={book.title} />
-
-                        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border bg-white/95 text-[#8C533A] border-[#E8DCC4]">
-                          {firstCategory}
-                        </span>
-
-                        <button
-                          onClick={(e) => toggleFavorite(e, book.id)}
-                          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/85 flex items-center justify-center text-rose-500 shadow-sm hover:scale-110 transition"
-                        >
-                          {isFav ? '💖' : '🤍'}
-                        </button>
-                      </div>
-
-                      <div>
-                        <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1">
-                          {book.title}
-                        </h3>
-                        <p className="text-xs text-gray-500 truncate">ผู้แต่ง: {book.author}</p>
+              return (
+                <div
+                  key={book.id}
+                  onClick={() => navigate(`/book/${book.id}`)}
+                  className="group bg-white rounded-2xl border border-[#EAE2D6] overflow-hidden shadow-[0_2px_8px_rgba(0,0,0,0.03)] hover:shadow-md transition cursor-pointer flex flex-col justify-between"
+                >
+                  <div>
+                    {/* พื้นหลังกรอบปกสีเบจด้านบน */}
+                    <div className="bg-[#EAE2D6] p-5 flex items-center justify-center">
+                      <div className="w-36 sm:w-40 aspect-[2/3] rounded-md overflow-hidden shadow-md bg-[#F4EFE6]">
+                        <BookCover
+                          src={book.cover_url || book.cover}
+                          title={book.title}
+                        />
                       </div>
                     </div>
 
-                    <div className="pt-3 border-t border-[#F4EFE6] mt-3 flex items-center justify-between">
-                      <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2.5 py-0.5 rounded-full truncate max-w-[120px]">
-                        ตรงกับแนวที่ชอบ
-                      </span>
-                      <span className="text-xs font-semibold text-[#8C533A] group-hover:underline flex-shrink-0">
-                        รายละเอียด &gt;
-                      </span>
+                    {/* รายละเอียดหนังสือ */}
+                    <div className="p-5 space-y-2.5">
+                      <h2 className="font-bold text-base text-[#2D1E16] line-clamp-1 group-hover:text-[#7A5644] transition">
+                        {book.title}
+                      </h2>
+
+                      <p className="text-xs text-[#7A6A60] line-clamp-1">
+                        ผู้เขียน: {book.author || 'ไม่ระบุผู้เขียน'}
+                      </p>
+
+                      <p className="text-xs text-[#5C4D44] leading-relaxed line-clamp-2 min-h-[2.5rem]">
+                        {book.description || book.reason || 'ไม่มีคำอธิบายเพิ่มเติม'}
+                      </p>
+
+                      {/* ป้ายหมวดหมู่ทั้งหมดของหนังสือ */}
+                      {bookCategories.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 pt-1">
+                          {bookCategories.map((cat, idx) => (
+                            <span
+                              key={idx}
+                              className="px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-[#EBE4D8] text-[#5C493E]"
+                            >
+                              {cat}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* ปีที่ตีพิมพ์ด้านล่างสุดของการ์ด */}
+                  <div className="px-5 pb-4 pt-1">
+                    <p className="text-[11px] text-[#8C7B70]">
+                      {publishYear ? `ปีที่ตีพิมพ์: ${publishYear}` : ''}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         ) : (
           <div className="text-center py-16 bg-white rounded-3xl border border-[#EBE4D8] space-y-4">
@@ -233,18 +170,12 @@ function Recommendations() {
               ยังไม่มีหนังสือในหมวดหมู่ที่คุณเลือกในขณะนี้
             </p>
             <p className="text-xs text-gray-500">
-              ลองเพิ่มหมวดหมู่ความสนใจอื่น หรือเลือกดูหนังสือทั้งหมดในคลังของเรา
+              ลองเลือกดูหนังสือทั้งหมดในคลังของเรา
             </p>
-            <div className="pt-2 flex justify-center gap-3">
-              <button
-                onClick={() => navigate('/interests')}
-                className="px-5 py-2.5 bg-[#7A5644] text-white rounded-full text-xs font-semibold hover:bg-[#5E4032] transition"
-              >
-                เลือกหมวดหมู่เพิ่มเติม
-              </button>
+            <div className="pt-2 flex justify-center">
               <button
                 onClick={() => navigate('/explore')}
-                className="px-5 py-2.5 bg-[#F4EFE6] text-[#4A2B1D] rounded-full text-xs font-semibold hover:bg-[#E8DCC4] transition"
+                className="px-6 py-2.5 bg-[#7A5644] text-white rounded-full text-xs font-semibold hover:bg-[#5E4032] transition"
               >
                 ดูหนังสือทั้งหมด
               </button>
