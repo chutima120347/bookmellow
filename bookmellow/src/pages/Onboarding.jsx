@@ -20,97 +20,68 @@ const interestCategories = [
   'Young Adult',
   'Children',
   'Poetry',
-  'Adventure'
+  'Adventure',
 ];
 
 function Onboarding() {
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
-  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [selectedCategories, setSelectedCategories] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
-  const [isSavedSuccess, setIsSavedSuccess] = useState(false);
 
-  // โหลดความสนใจเดิมของผู้ใช้ (ถ้ามี)
   useEffect(() => {
-    const loadExistingInterests = async () => {
+    const loadSavedInterests = async () => {
       try {
-        const localSaved = localStorage.getItem('user_interests');
-        if (localSaved) {
-          const parsed = JSON.parse(localSaved);
-          if (Array.isArray(parsed)) setSelectedInterests(parsed);
+        const savedLocal = localStorage.getItem('user_interests');
+        if (savedLocal) {
+          setSelectedCategories(JSON.parse(savedLocal));
         }
-      } catch (e) {
-        console.error(e);
-      }
 
-      if (isLoggedIn) {
-        try {
+        if (isLoggedIn) {
           const res = await apiRequest('/api/user/interests');
-          const list = Array.isArray(res) ? res : (res?.interests || res?.data || []);
-          if (Array.isArray(list) && list.length > 0) {
-            setSelectedInterests(list);
-            localStorage.setItem('user_interests', JSON.stringify(list));
+          const apiInterests = Array.isArray(res) ? res : (res?.interests || res?.data || []);
+          if (apiInterests.length > 0) {
+            setSelectedCategories(apiInterests);
+            localStorage.setItem('user_interests', JSON.stringify(apiInterests));
           }
-        } catch {
-          // ข้ามได้หาก Backend ยังไม่มี endpoint ดึงความสนใจ
         }
+      } catch {
+        // ใช้ค่าจาก localStorage ต่อได้
       }
     };
 
-    loadExistingInterests();
+    loadSavedInterests();
   }, [isLoggedIn]);
 
-  // กดเลือก / ยกเลิกหมวดหมู่
-  const toggleCategory = (category) => {
-    setIsSavedSuccess(false);
-    setSelectedInterests((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category]
+  const toggleCategory = (cat) => {
+    setSelectedCategories((prev) =>
+      prev.includes(cat) ? prev.filter((item) => item !== cat) : [...prev, cat]
     );
   };
 
-  // กดปุ่มบันทึกความสนใจ
   const handleSaveInterests = async () => {
-    if (selectedInterests.length === 0) {
-      alert('กรุณาเลือกหมวดหมู่หนังสือที่คุณสนใจอย่างน้อย 1 หมวดหมู่ค่ะ');
+    if (selectedCategories.length === 0) {
+      alert('กรุณาเลือกหมวดหมู่ที่สนใจอย่างน้อย 1 หมวดหมู่ค่ะ');
       return;
     }
 
     try {
       setIsSaving(true);
-      localStorage.setItem('user_interests', JSON.stringify(selectedInterests));
+      localStorage.setItem('user_interests', JSON.stringify(selectedCategories));
 
       if (isLoggedIn) {
-        const endpoints = [
-          { url: '/api/user/interests', method: 'POST' },
-          { url: '/api/user/interests', method: 'PUT' },
-          { url: '/api/users/interests', method: 'POST' },
-          { url: '/api/interests', method: 'POST' },
-        ];
-
-        for (const ep of endpoints) {
-          try {
-            await apiRequest(ep.url, {
-              method: ep.method,
-              body: JSON.stringify({
-                userId: user?.id,
-                interests: selectedInterests,
-                categories: selectedInterests,
-              }),
-            });
-            break;
-          } catch {
-            // ลอง endpoint ถัดไป
-          }
+        try {
+          await apiRequest('/api/user/interests', {
+            method: 'POST',
+            body: JSON.stringify({ interests: selectedCategories }),
+          });
+        } catch {
+          // บันทึกลง localStorage ไว้แล้ว
         }
       }
 
-      setIsSavedSuccess(true);
-    } catch (err) {
-      console.error('บันทึกความสนใจไม่สำเร็จ:', err);
-      setIsSavedSuccess(true);
+      navigate('/recommendations');
     } finally {
       setIsSaving(false);
     }
@@ -120,85 +91,65 @@ function Onboarding() {
     <div className="min-h-screen bg-[#FAF6EE] text-[#3B261C] flex flex-col justify-between font-sans">
       <Navbar />
 
-      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
-        {/* ส่วนหัวข้อตรงกลาง */}
-        <div className="text-center space-y-3 mb-12">
-          <p className="text-xs font-semibold tracking-[0.18em] text-[#8C6D5E] uppercase">
-            YOUR READING INTERESTS
-          </p>
-          <h1 className="text-3xl sm:text-4xl font-bold text-[#3B261C]">
-            คุณชอบอ่านหนังสือแนวไหน?
-          </h1>
-          <p className="text-xs sm:text-sm text-[#7A6A60]">
-            เลือกแนวหนังสือที่คุณสนใจได้หลายหมวดหมู่ เพื่อให้เราคัดสรรหนังสือที่เหมาะกับคุณ
-          </p>
-        </div>
-
-        {/* แถบหัวข้อหมวดหมู่ และตัวนับจำนวนที่เลือก */}
-        <div className="flex items-center justify-between mb-5 px-1">
-          <h2 className="text-sm sm:text-base font-bold text-[#3B261C]">
-            หมวดหมู่หนังสือ
-          </h2>
-          <span className="text-xs sm:text-sm text-[#8C7B70]">
-            เลือกแล้ว {selectedInterests.length} หมวดหมู่
-          </span>
-        </div>
-
-        {/* ตารางตัวเลือกหมวดหมู่ 4 คอลัมน์ */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
-          {interestCategories.map((category) => {
-            const isSelected = selectedInterests.includes(category);
-            return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => toggleCategory(category)}
-                className={`h-16 sm:h-[72px] px-4 rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
-                  isSelected
-                    ? 'bg-[#7A5644] text-white border-[#7A5644] shadow-sm'
-                    : 'bg-white text-[#3B261C] border-[#EBE4D8] hover:border-[#C8B8A6] hover:bg-[#FDFBF7]'
-                }`}
-              >
-                {isSelected && <span className="text-sm font-bold">✓</span>}
-                <span>{category}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* ปุ่มบันทึกความสนใจ */}
-        <div className="mt-10 flex justify-center">
-          <button
-            type="button"
-            disabled={isSaving}
-            onClick={handleSaveInterests}
-            className="px-10 py-3.5 bg-[#7A5644] hover:bg-[#5E4032] text-white rounded-full text-xs sm:text-sm font-semibold shadow-sm transition disabled:opacity-50"
-          >
-            {isSaving ? 'กำลังบันทึก...' : 'บันทึกความสนใจ'}
-          </button>
-        </div>
-
-        {/* กล่องแจ้งเตือนเมื่อบันทึกความสนใจเรียบร้อยแล้ว */}
-        {isSavedSuccess && (
-          <div className="mt-10 max-w-lg mx-auto bg-white border border-[#EBE4D8] rounded-3xl p-8 sm:p-10 text-center shadow-sm space-y-4">
-            <div className="text-2xl font-bold text-[#3B6E52]">✓</div>
-            <h3 className="text-lg sm:text-xl font-bold text-[#3B261C]">
-              บันทึกความสนใจเรียบร้อยแล้ว!
-            </h3>
-            <p className="text-xs sm:text-sm text-[#7A6A60] leading-relaxed">
-              เราคัดสรรหนังสือที่ตรงกับแนวที่คุณชอบไว้ให้แล้ว ลองไปดูหนังสือแนะนำของคุณกันเลย
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 flex items-center justify-center">
+        <div className="w-full bg-white rounded-3xl border border-[#EBE4D8] p-8 sm:p-10 shadow-sm space-y-8">
+          <div className="space-y-2 text-center sm:text-left">
+            <p className="text-xs font-semibold tracking-wider text-[#8C6D5E] uppercase">
+              PERSONALIZE YOUR FEED
             </p>
-            <div className="pt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#3B261C]">
+              คุณชอบอ่านหนังสือแนวไหน?
+            </h1>
+            <p className="text-xs sm:text-sm text-[#7A6A60]">
+              เลือกหมวดหมู่ที่สนใจอย่างน้อย 1 หมวดหมู่ เพื่อให้ระบบคัดสรรหนังสือที่ใช่สำหรับคุณ
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            {interestCategories.map((cat) => {
+              const isSelected = selectedCategories.includes(cat);
+              return (
+                <button
+                  key={cat}
+                  type="button"
+                  onClick={() => toggleCategory(cat)}
+                  className={`px-5 py-2.5 rounded-full text-xs sm:text-sm font-medium border transition ${
+                    isSelected
+                      ? 'bg-[#7A5644] text-white border-[#7A5644] shadow-sm'
+                      : 'bg-[#FAF6EE] text-[#4A2B1D] border-[#E6DEC8] hover:border-[#8C6D5E]'
+                  }`}
+                >
+                  {isSelected ? `✓ ${cat}` : cat}
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="pt-4 border-t border-[#F3EFE8] flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs text-[#7A6A60]">
+              เลือกแล้ว <span className="font-bold text-[#4A2B1D]">{selectedCategories.length}</span> หมวดหมู่
+            </p>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
               <button
                 type="button"
                 onClick={() => navigate('/recommendations')}
-                className="px-8 py-3 bg-[#4A2B1D] hover:bg-[#361E13] text-white rounded-full text-xs sm:text-sm font-semibold shadow-sm transition"
+                className="px-5 py-2.5 rounded-full text-xs font-medium text-[#7A6A60] hover:bg-[#FAF6EE] transition"
               >
-                ดูหนังสือแนะนำของฉัน
+                ข้ามไปก่อน
+              </button>
+
+              <button
+                type="button"
+                disabled={isSaving}
+                onClick={handleSaveInterests}
+                className="px-7 py-2.5 rounded-full bg-[#4A2B1D] hover:bg-[#633A27] text-white text-xs sm:text-sm font-semibold shadow-sm transition disabled:opacity-50"
+              >
+                {isSaving ? 'กำลังบันทึก...' : 'ดูหนังสือแนะนำของฉัน →'}
               </button>
             </div>
           </div>
-        )}
+        </div>
       </main>
 
       <Footer />

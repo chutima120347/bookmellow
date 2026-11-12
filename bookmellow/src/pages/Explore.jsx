@@ -6,22 +6,9 @@ import { apiRequest } from '../services/api';
 import BookCover from '../components/BookCover';
 
 const categoryOptions = [
-  { id: 'all', label: 'ทั้งหมด' },
-  { id: 'Fantasy', label: 'Fantasy' },
-  { id: 'Romance', label: 'Romance' },
-  { id: 'Mystery', label: 'Mystery' },
-  { id: 'Science Fiction', label: 'Science Fiction' },
-  { id: 'Thriller', label: 'Thriller' },
-  { id: 'Horror', label: 'Horror' },
-  { id: 'Historical Fiction', label: 'Historical Fiction' },
-  { id: 'Self-Help', label: 'Self-Help' },
-  { id: 'Business', label: 'Business' },
-  { id: 'Education', label: 'Education' },
-  { id: 'Biography', label: 'Biography' },
-  { id: 'Young Adult', label: 'Young Adult' },
-  { id: 'Children', label: 'Children' },
-  { id: 'Poetry', label: 'Poetry' },
-  { id: 'Adventure', label: 'Adventure' }
+  'Fantasy', 'Romance', 'Mystery', 'Science Fiction', 'Thriller',
+  'Horror', 'Historical Fiction', 'Self Help', 'Business', 'Education',
+  'Biography', 'Young Adult', 'Children', 'Poetry', 'Adventure'
 ];
 
 function Explore() {
