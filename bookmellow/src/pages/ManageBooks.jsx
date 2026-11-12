@@ -185,8 +185,7 @@ function ManageBooks() {
             onClick={handleOpenAddModal}
             className="px-6 py-3 bg-[#232129] hover:bg-[#36333F] text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm flex items-center gap-2 self-start sm:self-auto transition"
           >
-            <span>+</span>
-            <span>เพิ่มหนังสือใหม่</span>
+            <span>+ เพิ่มหนังสือใหม่</span>
           </button>
         </div>
 
@@ -347,6 +346,10 @@ function ManageBooks() {
                 </button>
               </div>
             </form>
+
+            <ConfirmBox open={confirmDelete} title={`ลบ "${form.title}" ?`} confirmText="ลบถาวร"
+                        busy={deleting} onConfirm={handleDelete} onCancel={() => setConfirmDelete(false)}>
+            </ConfirmBox>
           </div>
         </div>
       )}
@@ -355,5 +358,4 @@ function ManageBooks() {
     </div>
   );
 }
-
 export default ManageBooks;

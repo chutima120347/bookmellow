@@ -6,7 +6,7 @@ import BookCover from '../../components/BookCover';
 import { useAuth } from '../../auth/AuthContext';
 import { apiRequest } from '../../services/api';
 
-// การ์ดตัวเลข 1 ใบ (ธีม BookMellow)
+// การ์ดตัวเลข 1 ใบ
 function StatCard({ label, value, to }) {
   const body = (
     <>
@@ -54,17 +54,13 @@ function AdminDashboard() {
           membersList = [];
         }
 
-        const adminCount = membersList.filter(
-          (m) => String(m.role || '').toLowerCase() === 'admin' || m.isAdmin === true
-        ).length;
+        const adminCount = membersList.filter((m) => String(m.role || '').toLowerCase() === 'admin' || m.isAdmin === true).length;
 
         const topRated = dashboardRes?.topRated || dashboardRes?.topBooks || [...booksList]
-          .sort((a, b) => Number(b.rating || b.average_rating || 0) - Number(a.rating || a.average_rating || 0))
-          .slice(0, 5);
+          .sort((a, b) => Number(b.rating || b.average_rating || 0) - Number(a.rating || a.average_rating || 0)).slice(0, 5);
 
         const newestMembers = dashboardRes?.newestMembers || [...membersList]
-          .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
-          .slice(0, 5);
+          .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0)).slice(0, 5);
 
         if (!ignore) {
           setStats({
@@ -79,10 +75,7 @@ function AdminDashboard() {
           setStatus('success');
         }
       } catch (err) {
-        if (!ignore) {
-          setError(err);
-          setStatus('error');
-        }
+        if (!ignore) { setError(err); setStatus('error'); }
       }
     }
     load();
@@ -101,44 +94,28 @@ function AdminDashboard() {
             <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1C1A]">Admin Dashboard</h1>
             <p className="text-xs sm:text-sm text-[#7A756E] mt-1">ภาพรวมและจัดการระบบ BookMellow</p>
           </div>
-          <Link
-            to="/admin/manage-books"
-            className="px-5 py-2.5 bg-[#4A2B1D] hover:bg-[#633A27] text-white rounded-xl text-xs sm:text-sm font-semibold transition self-start sm:self-auto"
-          >
-            + จัดการหนังสือ
-          </Link>
+          <Link to="/admin/manage-books" className="px-5 py-2.5 bg-[#4A2B1D] hover:bg-[#633A27] text-white rounded-xl text-xs sm:text-sm font-semibold transition self-start sm:self-auto">+ จัดการหนังสือ</Link>
         </div>
 
         {status === 'loading' && (
-          <div className="rounded-2xl border border-[#E6E0D6] bg-white p-12 text-center text-sm text-[#8C533A] animate-pulse">
-            กำลังโหลดข้อมูลภาพรวม...
-          </div>
+          <div className="rounded-2xl border border-[#E6E0D6] bg-white p-12 text-center text-sm text-[#8C533A] animate-pulse">กำลังโหลดข้อมูลภาพรวม...</div>
         )}
 
         {status === 'error' && (
           <div className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-center space-y-3">
-            <p className="text-sm font-semibold text-rose-700">
-              โหลดข้อมูลไม่สำเร็จ: {error?.message || 'เกิดข้อผิดพลาด'}
-            </p>
-            <button
-              onClick={() => setReloadKey((k) => k + 1)}
-              className="px-4 py-2 bg-rose-600 text-white rounded-lg text-xs font-semibold hover:bg-rose-700 transition"
-            >
-              ลองใหม่
-            </button>
+            <p className="text-sm font-semibold text-rose-700">โหลดข้อมูลไม่สำเร็จ: {error?.message || 'เกิดข้อผิดพลาด'}</p>
+            <button onClick={() => setReloadKey((k) => k + 1)} className="px-4 py-2 bg-rose-600 text-white rounded-lg text-xs font-semibold hover:bg-rose-700 transition">ลองใหม่</button>
           </div>
         )}
 
         {status === 'success' && stats && (
           <div className="space-y-8">
-            {/* การ์ดสถิติ 5 ช่อง */}
             <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
               <StatCard label="หนังสือ" value={stats.books} to="/admin/manage-books" />
               <StatCard label="สมาชิก" value={stats.members} to="/admin/members" />
               <StatCard label="admin" value={stats.admins} to="/admin/members" />
             </div>
 
-            {/* ตาราง 2 คอลัมน์ */}
             <div className="grid gap-6 md:grid-cols-2">
               <section className="rounded-2xl border border-[#E6E0D6] bg-white p-5">
                 <h2 className="font-semibold text-[#1E1C1A]">หนังสือที่สมาชิกให้คะแนนสูงสุด</h2>
@@ -157,20 +134,14 @@ function AdminDashboard() {
                             <BookCover src={b.cover_url || b.cover} title={b.title} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <Link to={`/book/${b.id}`}
-                              className="block truncate text-sm font-medium text-[#1E1C1A] hover:text-[#8C533A]"
-                            >
-                              {b.title}
-                            </Link>
+                            <Link to={`/book/${b.id}`} className="block truncate text-sm font-medium text-[#1E1C1A] hover:text-[#8C533A]">{b.title}</Link>
                             {b.author && (
                               <p className="truncate text-xs text-[#7A756E]">ผู้เขียน: {b.author}</p>
                             )}
                           </div>
-                          <span className="text-sm text-[#4A2B1D]">
-                            ⭐ {rating > 0 ? rating.toFixed(1) : ' '}{' '}
+                          <span className="text-sm text-[#4A2B1D]">⭐ {rating > 0 ? rating.toFixed(1) : ' '}{' '}
                             {reviewCount > 0 && (
-                              <span className="text-xs text-[#8C7B70]">({reviewCount})</span>
-                            )}
+                              <span className="text-xs text-[#8C7B70]">({reviewCount})</span>)}
                           </span>
                         </li>
                       );
