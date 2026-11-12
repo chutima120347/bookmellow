@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { booksData } from '../data/data';
+import { apiRequest } from '../services/api';
 import BookCover from '../components/BookCover';
 
 const categoryOptions = [
@@ -14,7 +14,7 @@ const categoryOptions = [
   { id: 'Thriller', label: 'Thriller' },
   { id: 'Horror', label: 'Horror' },
   { id: 'Historical Fiction', label: 'Historical Fiction' },
-  { id: 'Self Help', label: 'Self Help' },
+  { id: 'Self-Help', label: 'Self-Help' },
   { id: 'Business', label: 'Business' },
   { id: 'Education', label: 'Education' },
   { id: 'Biography', label: 'Biography' },
@@ -31,8 +31,28 @@ function Explore() {
   const queryParams = new URLSearchParams(location.search);
   const searchFromUrl = queryParams.get('search') || '';
 
+  const [books, setBooks] = useState([]); // เก็บข้อมูลหนังสือจาก Backend
+  const [loading, setLoading] = useState(true); // สถานะกำลังโหลด
   const [searchQuery, setSearchQuery] = useState(searchFromUrl);
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // ดึงข้อมูลหนังสือทั้งหมดจาก Backend ทันทีที่เปิดหน้า Explore
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        const data = await apiRequest('/api/books');
+        const booksList = Array.isArray(data) ? data : (data.books || data.data || []);
+        setBooks(booksList);
+      } catch (error) {
+        console.error('ดึงข้อมูลหนังสือไม่สำเร็จ:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   useEffect(() => {
     const query = new URLSearchParams(location.search).get('search');
@@ -41,10 +61,7 @@ function Explore() {
     }
   }, [location.search]);
 
-  const safeBooksData = Array.isArray(booksData) ? booksData : [];
-
-  const filteredBooks = safeBooksData.filter((book) => {
-    // รองรับทั้ง categories ที่เป็น Array หรือ category เดี่ยว
+  const filteredBooks = books.filter((book) => {
     const bookCategories = Array.isArray(book.categories)
       ? book.categories
       : [book.category || ''];
@@ -119,68 +136,72 @@ function Explore() {
 
           {/* รายการแสดงหนังสือฝั่งขวา */}
           <section className="md:col-span-3 space-y-6">
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
-              {filteredBooks.length > 0 ? (
-                filteredBooks.map((book) => {
-                  const firstCategory = Array.isArray(book.categories) && book.categories.length > 0
-                    ? book.categories[0]
-                    : (book.category || 'ทั่วไป');
+            {loading ? (
+              <div className="text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
+                <p className="text-[#8C533A] text-sm animate-pulse">กำลังโหลดข้อมูลหนังสือทั้งหมด...</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 sm:gap-6">
+                {filteredBooks.length > 0 ? (
+                  filteredBooks.map((book) => {
+                    const firstCategory = Array.isArray(book.categories) && book.categories.length > 0
+                      ? book.categories[0]
+                      : (book.category || 'ทั่วไป');
 
-                  return (
-                    <div
-                      key={book.id}
-                      onClick={() => navigate(`/book/${book.id}`)}
-                      className="group bg-white rounded-2xl p-3 sm:p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
-                    >
-                      <div className="space-y-3">
-                        <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
-                          {/* รองรับทั้ง BookCover คอมโพเนนต์ และรูปภาพปกติ */}
-                          {BookCover ? (
-                            <BookCover src={book.cover_url || book.cover} title={book.title} />
-                          ) : (
-                            <img
-                              src={book.cover_url || book.cover}
-                              alt={book.title}
-                              className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                            />
-                          )}
+                    return (
+                      <div
+                        key={book.id}
+                        onClick={() => navigate(`/book/${book.id}`)}
+                        className="group bg-white rounded-2xl p-3 sm:p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
+                      >
+                        <div className="space-y-3">
+                          <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
+                            {BookCover ? (
+                              <BookCover src={book.cover_url || book.cover} title={book.title} />
+                            ) : (
+                              <img
+                                src={book.cover_url || book.cover}
+                                alt={book.title}
+                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                              />
+                            )}
 
-                          <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-[#8C533A] border-[#E8DCC4]">
-                            {book.badge || firstCategory}
+                            <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-[#8C533A] border-[#E8DCC4]">
+                              {book.badge || firstCategory}
+                            </span>
+                          </div>
+
+                          <div>
+                            <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1">
+                              {book.title}
+                            </h3>
+                            <p className="text-xs text-gray-500 truncate">
+                              ผู้แต่ง: {book.author}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-[#F4EFE6] mt-3 flex items-center justify-between">
+                          <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2 py-0.5 rounded-full truncate max-w-[100px]">
+                            {book.categoryName || firstCategory}
+                          </span>
+                          <span className="text-xs font-semibold text-[#8C533A] group-hover:underline">
+                            รายละเอียด &gt;
                           </span>
                         </div>
-
-                        <div>
-                          <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1">
-                            {book.title}
-                          </h3>
-                          <p className="text-xs text-gray-500 truncate">
-                            ผู้แต่ง: {book.author}
-                          </p>
-                        </div>
                       </div>
-
-                      <div className="pt-3 border-t border-[#F4EFE6] mt-3 flex items-center justify-between">
-                        <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2 py-0.5 rounded-full truncate max-w-[100px]">
-                          {book.categoryName || firstCategory}
-                        </span>
-                        <span className="text-xs font-semibold text-[#8C533A] group-hover:underline">
-                          รายละเอียด &gt;
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
-                  <p className="text-gray-400 text-xs">ไม่พบหนังสือที่ตรงกับคำค้นหา</p>
-                </div>
-              )}
-            </div>
+                    );
+                  })
+                ) : (
+                  <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
+                    <p className="text-gray-400 text-xs">ไม่พบหนังสือที่ตรงกับคำค้นหา</p>
+                  </div>
+                )}
+              </div>
+            )}
           </section>
         </div>
       </main>
-
       <Footer />
     </div>
   );

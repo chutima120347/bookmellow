@@ -21,7 +21,9 @@ function Favorites() {
       }
       try {
         const res = await apiRequest('/api/me/favorites');
-        setFavoriteBooks(res.data || []);
+        // รองรับทั้งกรณีที่ Backend ส่งกลับมาเป็น Array ตรงๆ หรืออยู่ใน .data / .favorites
+        const favList = Array.isArray(res) ? res : (res?.data || res?.favorites || []);
+        setFavoriteBooks(favList);
       } catch (err) {
         console.error('Failed to load favorites:', err);
       } finally {
@@ -38,7 +40,7 @@ function Favorites() {
       await apiRequest(`/api/me/favorites/${bookId}`, {
         method: 'DELETE',
       });
-      setFavoriteBooks((prev) => prev.filter((book) => book.id !== bookId));
+      setFavoriteBooks((prev) => prev.filter((book) => String(book.id) !== String(bookId)));
     } catch (err) {
       alert(err.message || 'ไม่สามารถลบรายการโปรดได้');
     }
@@ -65,7 +67,7 @@ function Favorites() {
             {favoriteBooks.map((book) => {
               const categoryBadge = Array.isArray(book.categories) && book.categories.length > 0 
                 ? book.categories[0] 
-                : 'ทั่วไป';
+                : (book.category || 'ทั่วไป');
 
               return (
                 <div
@@ -75,7 +77,7 @@ function Favorites() {
                 >
                   <div className="space-y-3">
                     <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#FAF7F0]">
-                      <BookCover src={book.cover_url} title={book.title} />
+                      <BookCover src={book.cover_url || book.cover} title={book.title} />
                       <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-pink-600 bg-pink-100">
                         {categoryBadge}
                       </span>

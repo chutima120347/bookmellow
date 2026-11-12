@@ -4,7 +4,6 @@ import Footer from '../components/Footer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../services/api';
-import { booksData } from '../data/data';
 import BookCover from '../components/BookCover';
 
 function BookDetail() {
@@ -21,32 +20,34 @@ function BookDetail() {
   const [reviewsList, setReviewsList] = useState([]);
   const [activeTab, setActiveTab] = useState('description');
 
-  // ดึงข้อมูลรายละเอียดหนังสือ
+  // ดึงข้อมูลรายละเอียดหนังสือจาก Backend
   useEffect(() => {
     async function loadBookData() {
       try {
         setIsLoading(true);
         
-        // 1. ลองยิง API ดึงข้อมูล
+        // 1. ลองยิง API ดึงข้อมูลรายเล่มก่อน
         let foundBook = null;
         try {
           const bookRes = await apiRequest(`/api/books/${id}`);
-          foundBook = bookRes?.data || bookRes;
+          foundBook = bookRes?.book || bookRes?.data || bookRes;
         } catch (apiErr) {
-          console.warn('API connection failed, falling back to local booksData:', apiErr);
+          // 2. ถ้า Backend ไม่มี route /api/books/:id ให้ดึงทั้งหมดมาค้นหาตาม id แทน
+          try {
+            const allRes = await apiRequest('/api/books');
+            const allBooks = Array.isArray(allRes) ? allRes : (allRes?.books || allRes?.data || []);
+            foundBook = allBooks.find((b) => String(b.id) === String(id));
+          } catch (fallbackErr) {
+            console.error('Failed to load books from backend:', fallbackErr);
+          }
         }
 
-        // 2. ถ้า API ไม่มีข้อมูล หรือยิงไม่ผ่าน ให้ค้นหาจาก booksData ในเครื่อง
-        if (!foundBook && Array.isArray(booksData)) {
-          foundBook = booksData.find((b) => String(b.id) === String(id));
-        }
-
-        setBook(foundBook || null);
+        setBook(foundBook && foundBook.id ? foundBook : null);
 
         // 3. ดึงรีวิวของหนังสือ
         try {
           const reviewRes = await apiRequest(`/api/books/${id}/reviews`);
-          setReviewsList(reviewRes?.reviews || reviewRes?.data || []);
+          setReviewsList(reviewRes?.reviews || reviewRes?.data || (Array.isArray(reviewRes) ? reviewRes : []));
         } catch (err) {
           setReviewsList([]);
         }
@@ -55,8 +56,8 @@ function BookDetail() {
         if (isLoggedIn) {
           try {
             const favRes = await apiRequest('/api/me/favorites');
-            const favs = favRes?.data || favRes || [];
-            setIsFavorite(favs.some((b) => String(b.id) === String(id)));
+            const favs = Array.isArray(favRes) ? favRes : (favRes?.favorites || favRes?.data || []);
+            setIsFavorite(favs.some((b) => String(b.id || b.book_id) === String(id)));
           } catch (err) {
             console.error('Failed to check favorites:', err);
           }
@@ -91,7 +92,6 @@ function BookDetail() {
         setIsFavorite(true);
       }
     } catch (err) {
-      // สลับสถานะในฝั่ง Frontend เมื่อไม่มี API
       setIsFavorite(!isFavorite);
     }
   };

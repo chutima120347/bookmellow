@@ -14,7 +14,7 @@ const categoryOptions = [
   { id: 'Thriller', label: 'Thriller' },
   { id: 'Horror', label: 'Horror' },
   { id: 'Historical Fiction', label: 'Historical Fiction' },
-  { id: 'Self Help', label: 'Self Help' },
+  { id: 'Self-Help', label: 'Self-Help' },
   { id: 'Business', label: 'Business' },
   { id: 'Education', label: 'Education' },
   { id: 'Biography', label: 'Biography' },
