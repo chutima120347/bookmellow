@@ -22,8 +22,8 @@ export async function apiRequest(endpoint, options = {}) {
     headers,
   });
 
-  // ถ้า Token หมดอายุ หรือไม่ได้รับอนุญาต (401)
-  if (response.status === 401) {
+  // ถ้า Token หมดอายุ หรือไม่ได้รับอนุญาต (401) และ "ไม่ใช่" หน้า Login
+  if (response.status === 401 && !endpoint.includes('login') && !endpoint.includes('auth')) {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
     window.location.href = '/auth';

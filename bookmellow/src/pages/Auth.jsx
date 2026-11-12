@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
+import { apiRequest } from '../services/api';
 
 function Auth() {
   const [isLoginTab, setIsLoginTab] = useState(true);
@@ -27,10 +28,24 @@ function Auth() {
         // -------------------------------------------------------------
         // 1. กรณี: เข้าสู่ระบบ (POST /api/auth/login)
         // -------------------------------------------------------------
+        const data = await apiRequest('/api/auth/login', {
+          method: 'POST',
+          body: JSON.stringify({ email, password }),
+        });
+
+        // บันทึก Token ลง localStorage เพื่อให้ apiRequest นำไปใช้ในหน้าถัดไป
+        const token = data.token || data.accessToken || data.data?.token;
+        if (token) {
+          localStorage.setItem('token', token);
+        }
+
+        // ดึงข้อมูล User จาก Backend มาเก็บใน AuthContext
+        const userData = data.user || data.data?.user || {};
         login({
-          displayName: email.split('@')[0],
-          email: email,
-          isAdmin: false,
+          id: userData.id || userData._id,
+          displayName: userData.username || userData.name || email.split('@')[0],
+          email: userData.email || email,
+          isAdmin: userData.role === 'admin' || userData.isAdmin || false,
         });
 
         alert('เข้าสู่ระบบสำเร็จแล้วค่ะ! ☕');
@@ -46,11 +61,16 @@ function Auth() {
           return;
         }
 
+        await apiRequest('/api/auth/register', {
+          method: 'POST',
+          body: JSON.stringify({ username, email, password }),
+        });
+
         alert('สมัครสมาชิกสำเร็จแล้ว! กรุณาเข้าสู่ระบบนะคะ');
         setIsLoginTab(true); // สลับกลับไปแท็บเข้าสู่ระบบ
       }
     } catch (err) {
-      alert(err.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อ');
+      alert(err.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง');
     } finally {
       setIsLoading(false);
     }
