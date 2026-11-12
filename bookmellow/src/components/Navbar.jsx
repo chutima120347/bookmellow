@@ -73,14 +73,15 @@ function Navbar() {
                 รายการโปรด
               </button>
             )}
+            {/* เมนู แดชบอร์ด เรียงอยู่ข้างๆ กันบนแถบด้านบน */}
             {isLoggedIn && user?.isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
-                className={`px-3 py-1 rounded-full bg-[#8C533A] text-white text-xs font-semibold hover:bg-[#633A27] transition ${
-                  location.pathname.startsWith('/admin') ? 'ring-2 ring-[#E8DCC4]' : ''
+                className={`transition hover:text-[#E8DCC4] ${
+                  location.pathname.startsWith('/admin') ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
                 }`}
               >
-                👑 จัดการระบบ
+                แดชบอร์ด
               </button>
             )}
           </nav>
@@ -154,7 +155,7 @@ function Navbar() {
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
                     >
-                      <span>👑</span> แผงควบคุม Admin
+                      <span>👑</span> แดชบอร์ด Admin
                     </button>
                   )}
 
