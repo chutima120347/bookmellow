@@ -9,6 +9,7 @@ function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // ค้นหาหนังสือจากแถบ Navbar แล้วส่งไปหน้า Explore
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -18,12 +19,14 @@ function Navbar() {
     }
   };
 
+  // ออกจากระบบ
   const handleLogout = () => {
     setIsDropdownOpen(false);
     logout();
     navigate('/auth');
   };
 
+  // ตัวอักษรย่อสำหรับไอคอนโปรไฟล์
   const userInitial = user?.displayName
     ? user.displayName.charAt(0).toUpperCase()
     : 'U';
@@ -32,6 +35,7 @@ function Navbar() {
     <header className="sticky top-0 z-40 bg-[#4A2B1D] text-[#FDFBF7] shadow-md border-b border-[#633A27]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         
+        {/* โลโก้ BookMellow */}
         <button
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#FDFBF7] hover:text-[#E8DCC4] transition flex-shrink-0"
@@ -40,6 +44,7 @@ function Navbar() {
           <span>BookMellow</span>
         </button>
 
+        {/* เมนูนำทาง และ ช่องค้นหา */}
         <div className="flex items-center gap-4 sm:gap-6 flex-1 justify-end">
           <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium">
             <button
@@ -68,6 +73,7 @@ function Navbar() {
                 รายการโปรด
               </button>
             )}
+            {/* เมนู แดชบอร์ด เรียงอยู่ข้างๆ กันบนแถบด้านบน */}
             {isLoggedIn && user?.isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
@@ -80,6 +86,7 @@ function Navbar() {
             )}
           </nav>
 
+          {/* ช่องค้นหาด่วน */}
           <form onSubmit={handleSearchSubmit} className="relative hidden sm:block w-48 lg:w-64">
             <input
               type="text"
@@ -91,6 +98,7 @@ function Navbar() {
             <span className="absolute left-2.5 top-1.5 text-xs text-[#E8DCC4]">🔍</span>
           </form>
 
+          {/* ปุ่มโปรไฟล์ / เข้าสู่ระบบ */}
           {isLoggedIn ? (
             <div className="relative">
               <button
@@ -101,6 +109,7 @@ function Navbar() {
                 {userInitial}
               </button>
 
+              {/* Dropdown Menu */}
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-[#E8DCC4] py-2 text-xs text-[#4A2B1D] z-50">
                   <div className="px-4 py-2 border-b border-[#F4EFE6]">
@@ -128,18 +137,6 @@ function Navbar() {
                     <span>💖</span> รายการโปรด
                   </button>
 
-                  {user?.isAdmin && (
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        navigate('/admin');
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
-                    >
-                      <span>👑</span> แดชบอร์ด
-                    </button>
-                  )}
-
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
@@ -149,6 +146,18 @@ function Navbar() {
                   >
                     <span>🔍</span> ค้นหาหนังสือ
                   </button>
+
+                  {user?.isAdmin && (
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate('/admin');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
+                    >
+                      <span>👑</span> แดชบอร์ด Admin
+                    </button>
+                  )}
 
                   <div className="border-t border-[#F4EFE6] mt-1 pt-1">
                     <button
