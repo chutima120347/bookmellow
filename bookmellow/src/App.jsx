@@ -11,7 +11,6 @@ import Recommendations from './pages/Recommendations';
 import Auth from './pages/Auth';
 import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/AdminDashboard';
-import AdminMembers from './pages/AdminMembers';
 import ManageBooks from './pages/ManageBooks';
 
 function Forbidden403() {
@@ -77,14 +76,6 @@ function App() {
             }
           />
           <Route
-            path="/admin/members"
-            element={
-              <AdminRoute>
-                <AdminMembers />
-              </AdminRoute>
-            }
-          />
-          <Route
             path="/admin/manage-books"
             element={
               <AdminRoute>
@@ -97,5 +88,4 @@ function App() {
     </AuthProvider>
   );
 }
-
 export default App;
