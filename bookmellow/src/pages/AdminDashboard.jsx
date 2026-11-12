@@ -25,11 +25,11 @@ function AdminDashboard() {
 
         // 2. ดึงรายการหนังสือ (GET /api/admin/books)
         const booksRes = await apiRequest('/api/admin/books');
-        setBooksList(booksRes.data || []);
+        setBooksList(booksRes?.data || booksRes || []);
 
         // 3. ดึงรายการสมาชิก (GET /api/admin/members)
         const membersRes = await apiRequest('/api/admin/members');
-        setMembersList(membersRes.data || []);
+        setMembersList(membersRes?.data || membersRes || []);
       } catch (err) {
         console.error('Failed to load admin data:', err);
       } finally {
@@ -95,25 +95,25 @@ function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] text-[#4A3E3D]">
+    <div className="min-h-screen bg-[#FDFBF7] text-[#4A2B1D]">
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         {/* Header Admin */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-3xl border border-pink-100 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-[#E8DCC4] shadow-sm">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-100 text-purple-600 rounded-full text-xs font-semibold mb-2">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#F4EFE6] text-[#8C533A] border border-[#E8DCC4] rounded-full text-xs font-semibold mb-2">
               <span>👑 ผู้ดูแลระบบ (Admin Mode)</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-bold">แผงควบคุมระบบ BookMellow</h1>
-            <p className="text-xs sm:text-sm text-slate-400 mt-1">
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#4A2B1D]">แผงควบคุมระบบ BookMellow</h1>
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
               จัดการข้อมูลหนังสือ หมวดหมู่ และภาพรวมของระบบทั้งหมด
             </p>
           </div>
 
           <button
             onClick={() => navigate('/admin/manage-books')}
-            className="px-5 py-2.5 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white rounded-full text-xs font-bold shadow-md transition flex items-center justify-center gap-2 self-start sm:self-auto"
+            className="px-5 py-2.5 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-full text-xs font-bold shadow-md transition flex items-center justify-center gap-2 self-start sm:self-auto"
           >
             <span>➕ เพิ่มหนังสือเล่มใหม่</span>
           </button>
@@ -121,52 +121,52 @@ function AdminDashboard() {
 
         {/* Overview Widgets */}
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          <div className="bg-white p-5 rounded-3xl border border-pink-100 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-pink-500">
+          <div className="bg-white p-5 rounded-2xl border border-[#E8DCC4] shadow-sm space-y-2">
+            <div className="flex items-center justify-between text-[#8C533A]">
               <span className="text-xs font-semibold">หนังสือทั้งหมด</span>
               <span className="text-lg">📚</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold">{stats.books}</p>
-            <p className="text-[10px] text-slate-400">รายการในระบบ</p>
+            <p className="text-2xl sm:text-3xl font-bold text-[#4A2B1D]">{stats.books}</p>
+            <p className="text-[10px] text-gray-400">รายการในระบบ</p>
           </div>
 
-          <div className="bg-[#FAF7F0] p-5 rounded-3xl border border-purple-100 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-purple-500">
+          <div className="bg-[#F4EFE6] p-5 rounded-2xl border border-[#E8DCC4] shadow-sm space-y-2">
+            <div className="flex items-center justify-between text-[#633A27]">
               <span className="text-xs font-semibold">สมาชิก (Members)</span>
               <span className="text-lg">👥</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold">{stats.members}</p>
-            <p className="text-[10px] text-slate-400">ผู้ใช้งานทั่วไป</p>
+            <p className="text-2xl sm:text-3xl font-bold text-[#4A2B1D]">{stats.members}</p>
+            <p className="text-[10px] text-gray-500">ผู้ใช้งานทั่วไป</p>
           </div>
 
-          <div className="bg-[#FAF7F0] p-5 rounded-3xl border border-amber-100 shadow-sm space-y-2">
-            <div className="flex items-center justify-between text-amber-500">
+          <div className="bg-[#F4EFE6] p-5 rounded-2xl border border-[#E8DCC4] shadow-sm space-y-2">
+            <div className="flex items-center justify-between text-[#8C533A]">
               <span className="text-xs font-semibold">ผู้ดูแลระบบ (Admins)</span>
               <span className="text-lg">👑</span>
             </div>
-            <p className="text-2xl sm:text-3xl font-bold">{stats.admins}</p>
-            <p className="text-[10px] text-slate-400">ผู้ดูแลระบบทั้งหมด</p>
+            <p className="text-2xl sm:text-3xl font-bold text-[#4A2B1D]">{stats.admins}</p>
+            <p className="text-[10px] text-gray-500">ผู้ดูแลระบบทั้งหมด</p>
           </div>
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex gap-3 border-b border-pink-100 pb-2">
+        <div className="flex gap-3 border-b border-[#E8DCC4] pb-2">
           <button
             onClick={() => setActiveTab('books')}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
               activeTab === 'books'
-                ? 'bg-[#FF9EAA] text-white shadow-sm'
-                : 'bg-white text-slate-500 hover:bg-pink-50'
+                ? 'bg-[#8C533A] text-white shadow-sm'
+                : 'bg-white text-gray-600 border border-[#E8DCC4] hover:bg-[#F4EFE6]'
             }`}
           >
             📖 จัดการคลังหนังสือ ({booksList.length})
           </button>
           <button
             onClick={() => setActiveTab('members')}
-            className={`px-4 py-2 rounded-2xl text-xs font-bold transition ${
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
               activeTab === 'members'
-                ? 'bg-[#FF9EAA] text-white shadow-sm'
-                : 'bg-white text-slate-500 hover:bg-pink-50'
+                ? 'bg-[#8C533A] text-white shadow-sm'
+                : 'bg-white text-gray-600 border border-[#E8DCC4] hover:bg-[#F4EFE6]'
             }`}
           >
             👥 จัดการสมาชิก ({membersList.length})
@@ -174,9 +174,9 @@ function AdminDashboard() {
         </div>
 
         {/* Table Management Section */}
-        <section className="bg-white rounded-3xl p-6 border border-pink-100 shadow-sm space-y-4">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-pink-50">
-            <h2 className="text-lg font-bold flex items-center gap-2">
+        <section className="bg-white rounded-2xl p-6 border border-[#E8DCC4] shadow-sm space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#F4EFE6]">
+            <h2 className="text-lg font-bold flex items-center gap-2 text-[#4A2B1D]">
               <span>{activeTab === 'books' ? '📖' : '👥'}</span>{' '}
               {activeTab === 'books' ? `รายการหนังสือ (${filteredBooks.length})` : `รายการสมาชิก (${filteredMembers.length})`}
             </h2>
@@ -187,18 +187,18 @@ function AdminDashboard() {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder={activeTab === 'books' ? "ค้นหาชื่อหนังสือ / ผู้แต่ง..." : "ค้นหาชื่อ / อีเมล..."}
-                className="w-full px-3 py-1.5 pl-8 bg-[#FAF7F0] border border-pink-200 rounded-xl text-xs focus:outline-none"
+                className="w-full px-3 py-1.5 pl-8 bg-[#F4EFE6] border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
               />
-              <span className="absolute left-2.5 top-2 text-xs text-slate-400">🔍</span>
+              <span className="absolute left-2.5 top-2 text-xs text-gray-400">🔍</span>
             </div>
           </div>
 
           {isLoading ? (
-            <div className="text-center py-12 text-slate-400 text-xs">กำลังโหลดข้อมูล...</div>
+            <div className="text-center py-12 text-gray-400 text-xs">กำลังโหลดข้อมูล...</div>
           ) : activeTab === 'books' ? (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF7F0] text-slate-500 font-semibold border-b border-pink-100">
+                <thead className="bg-[#F4EFE6] text-[#4A2B1D] font-semibold border-b border-[#E8DCC4]">
                   <tr>
                     <th className="p-3 rounded-l-xl">หนังสือ</th>
                     <th className="p-3">หมวดหมู่</th>
@@ -206,41 +206,41 @@ function AdminDashboard() {
                     <th className="p-3 text-right rounded-r-xl">จัดการ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-pink-50">
+                <tbody className="divide-y divide-[#F4EFE6]">
                   {filteredBooks.map((book) => {
                     const categoryBadge = Array.isArray(book.categories) && book.categories.length > 0
                       ? book.categories.join(', ')
-                      : 'ทั่วไป';
+                      : (book.category || 'ทั่วไป');
 
                     return (
-                      <tr key={book.id} className="hover:bg-pink-50/40 transition">
+                      <tr key={book.id} className="hover:bg-[#F4EFE6]/50 transition">
                         <td className="p-3">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-13 flex-shrink-0 rounded-lg overflow-hidden shadow-sm">
-                              <BookCover src={book.cover_url} title={book.title} />
+                            <div className="w-10 h-14 flex-shrink-0 rounded-md overflow-hidden shadow-sm bg-[#F4EFE6]">
+                              <BookCover src={book.cover_url || book.cover} title={book.title} />
                             </div>
                             <div>
-                              <p className="font-bold text-[#4A3E3D]">{book.title}</p>
-                              <p className="text-[10px] text-slate-400">ผู้แต่ง: {book.author}</p>
+                              <p className="font-bold text-[#4A2B1D]">{book.title}</p>
+                              <p className="text-[10px] text-gray-500">ผู้แต่ง: {book.author}</p>
                             </div>
                           </div>
                         </td>
                         <td className="p-3">
-                          <span className="px-2.5 py-1 bg-pink-50 text-pink-500 rounded-full border border-pink-100 text-[10px] font-semibold">
+                          <span className="px-2.5 py-1 bg-[#F4EFE6] text-[#8C533A] rounded-full border border-[#E8DCC4] text-[10px] font-semibold">
                             {categoryBadge}
                           </span>
                         </td>
-                        <td className="p-3 text-slate-500">{book.published_year || '-'}</td>
+                        <td className="p-3 text-gray-500">{book.published_year || '-'}</td>
                         <td className="p-3 text-right space-x-2">
                           <button
                             onClick={() => navigate(`/admin/manage-books?edit=${book.id}`)}
-                            className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg font-semibold hover:bg-amber-200 transition"
+                            className="px-3 py-1 bg-amber-100 text-amber-800 rounded-lg font-semibold hover:bg-amber-200 transition"
                           >
                             แก้ไข
                           </button>
                           <button
                             onClick={() => handleDeleteBook(book.id, book.title)}
-                            className="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 transition"
+                            className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg font-semibold hover:bg-rose-200 transition"
                           >
                             ลบ
                           </button>
@@ -254,7 +254,7 @@ function AdminDashboard() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
-                <thead className="bg-[#FAF7F0] text-slate-500 font-semibold border-b border-pink-100">
+                <thead className="bg-[#F4EFE6] text-[#4A2B1D] font-semibold border-b border-[#E8DCC4]">
                   <tr>
                     <th className="p-3 rounded-l-xl">ชื่อผู้ใช้</th>
                     <th className="p-3">อีเมล</th>
@@ -262,14 +262,16 @@ function AdminDashboard() {
                     <th className="p-3 text-right rounded-r-xl">จัดการ</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-pink-50">
+                <tbody className="divide-y divide-[#F4EFE6]">
                   {filteredMembers.map((m) => (
-                    <tr key={m.id} className="hover:bg-pink-50/40 transition">
-                      <td className="p-3 font-bold text-[#4A3E3D]">{m.username}</td>
-                      <td className="p-3 text-slate-500">{m.email}</td>
+                    <tr key={m.id} className="hover:bg-[#F4EFE6]/50 transition">
+                      <td className="p-3 font-bold text-[#4A2B1D]">{m.username}</td>
+                      <td className="p-3 text-gray-500">{m.email}</td>
                       <td className="p-3">
                         <span className={`px-2.5 py-1 rounded-full text-[10px] font-semibold ${
-                          m.role === 'admin' ? 'bg-purple-100 text-purple-600 border border-purple-200' : 'bg-slate-100 text-slate-600'
+                          m.role === 'admin' 
+                            ? 'bg-[#8C533A] text-white' 
+                            : 'bg-gray-100 text-gray-700 border border-gray-200'
                         }`}>
                           {m.role === 'admin' ? '👑 Admin' : '👤 Member'}
                         </span>
@@ -277,13 +279,13 @@ function AdminDashboard() {
                       <td className="p-3 text-right space-x-2">
                         <button
                           onClick={() => handleToggleRole(m.id, m.role)}
-                          className="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 transition"
+                          className="px-3 py-1 bg-[#F4EFE6] text-[#8C533A] border border-[#E8DCC4] rounded-lg font-semibold hover:bg-[#E8DCC4] transition"
                         >
                           เปลี่ยนสิทธิ์
                         </button>
                         <button
                           onClick={() => handleDeleteMember(m.id, m.username)}
-                          className="px-3 py-1 bg-red-100 text-red-600 rounded-lg font-semibold hover:bg-red-200 transition"
+                          className="px-3 py-1 bg-rose-100 text-rose-700 rounded-lg font-semibold hover:bg-rose-200 transition"
                         >
                           ลบ
                         </button>

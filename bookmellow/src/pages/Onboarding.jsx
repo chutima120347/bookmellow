@@ -44,7 +44,7 @@ function Onboarding() {
         method: 'PUT',
         body: JSON.stringify({ category_ids: selectedCategoryIds }),
       });
-      alert('บันทึกความสนใจเรียบร้อยแล้วค่ะ! 🌸');
+      alert('บันทึกความสนใจเรียบร้อยแล้วค่ะ!');
       navigate('/');
     } catch (err) {
       alert(err.message || 'บันทึกข้อมูลไม่สำเร็จ');
@@ -58,7 +58,7 @@ function Onboarding() {
   return (
     <div className="min-h-screen bg-[#FAF7F0] p-6 max-w-2xl mx-auto space-y-6 text-[#4A3E3D]">
       <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">🎯 เลือกหมวดหมู่หนังสือที่คุณสนใจ</h1>
+        <h1 className="text-2xl font-bold">เลือกหมวดหมู่หนังสือที่คุณสนใจ</h1>
         <p className="text-xs text-slate-400">ระบบจะนำหมวดหมู่นี้ไปจัดหนังสือแนะนำฮีลใจให้คุณ</p>
       </div>
 
@@ -85,10 +85,9 @@ function Onboarding() {
         onClick={handleSavePreferences}
         className="w-full py-3 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white font-bold text-xs rounded-2xl shadow-md"
       >
-        บันทึกและเริ่มต้นใช้งาน 🌸
+        บันทึกและเริ่มต้นใช้งาน
       </button>
     </div>
   );
 }
-
 export default Onboarding;

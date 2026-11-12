@@ -116,15 +116,13 @@ function Favorites() {
               onClick={() => navigate('/explore')}
               className="px-6 py-2.5 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white text-xs font-semibold rounded-full shadow-sm transition"
             >
-              ไปเลือกดูหนังสือกันเลย 📚
+              ไปเลือกดูหนังสือกันเลย
             </button>
           </div>
         )}
       </main>
-
       <Footer />
     </div>
   );
 }
-
 export default Favorites;

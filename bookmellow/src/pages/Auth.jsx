@@ -27,27 +27,13 @@ function Auth() {
         // -------------------------------------------------------------
         // 1. กรณี: เข้าสู่ระบบ (POST /api/auth/login)
         // -------------------------------------------------------------
-        /* ตัวอย่างเมื่อต่อ API จริง:
-        const response = await fetch('/api/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password }),
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'เข้าสู่ระบบไม่สำเร็จ');
-        
-        localStorage.setItem('token', data.token); // เก็บ JWT Token
-        login(data.user);
-        */
-
-        // Mock Data สำหรับทดสอบชั่วคราว
         login({
           displayName: email.split('@')[0],
           email: email,
           isAdmin: false,
         });
 
-        alert('เข้าสู่ระบบสำเร็จแล้วค่ะ! 🌸');
+        alert('เข้าสู่ระบบสำเร็จแล้วค่ะ! ☕');
         navigate('/');
 
       } else {
@@ -60,17 +46,7 @@ function Auth() {
           return;
         }
 
-        /* ตัวอย่างเมื่อต่อ API จริง:
-        const response = await fetch('/api/auth/register', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, email, password }),
-        });
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || 'สมัครสมาชิกไม่สำเร็จ');
-        */
-
-        alert('สมัครสมาชิกสำเร็จแล้ว! กรุณาเข้าสู่ระบบนะคะ 💕');
+        alert('สมัครสมาชิกสำเร็จแล้ว! กรุณาเข้าสู่ระบบนะคะ');
         setIsLoginTab(true); // สลับกลับไปแท็บเข้าสู่ระบบ
       }
     } catch (err) {
@@ -91,85 +67,88 @@ function Auth() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] flex flex-col justify-between p-4 text-[#4A3E3D]">
+    <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
+      {/* Header Logo */}
       <div className="max-w-7xl mx-auto w-full pt-4">
         <button 
           onClick={() => navigate('/')} 
-          className="flex items-center gap-2 text-2xl font-bold hover:opacity-80 transition"
+          className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
         >
           📚 <span>BookMellow</span>
         </button>
       </div>
 
+      {/* Main Content */}
       <div className="flex-1 flex items-center justify-center py-8">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-pink-100 shadow-sm space-y-6">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
           
           <div className="text-center space-y-2">
-            <div className="text-3xl">🌸</div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-[#4A2B1D]">
               {isLoginTab ? 'เข้าสู่ระบบ BookMellow' : 'สมัครสมาชิกใหม่'}
             </h1>
-            <p className="text-xs text-slate-400">
-              {isLoginTab ? 'กรอกข้อมูลเพื่อเข้าสู่ระบบ' : 'สร้างบัญชีผู้ใช้เพื่อเริ่มต้นใช้งานคลังหนังสือสุดคิ้วท์'}
+            <p className="text-xs text-gray-500">
+              {isLoginTab ? 'กรอกข้อมูลเพื่อเข้าสู่ระบบ' : 'สร้างบัญชีผู้ใช้เพื่อเริ่มต้นใช้งานคลังหนังสือสุดอบอุ่น'}
             </p>
           </div>
 
-          <div className="flex bg-[#FAF7F0] p-1 rounded-2xl text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => setIsLoginTab(false)}
-              className={`flex-1 py-2.5 rounded-xl transition ${
-                !isLoginTab ? 'bg-white text-pink-500 shadow-sm' : 'text-slate-400'
-              }`}
-            >
-              สมัครสมาชิก
-            </button>
+          {/* แท็บสลับ เข้าสู่ระบบ / สมัครสมาชิก */}
+          <div className="flex bg-[#F4EFE6] p-1 rounded-2xl text-xs font-semibold border border-[#E8DCC4]">
             <button
               type="button"
               onClick={() => setIsLoginTab(true)}
               className={`flex-1 py-2.5 rounded-xl transition ${
-                isLoginTab ? 'bg-white text-pink-500 shadow-sm' : 'text-slate-400'
+                isLoginTab ? 'bg-white text-[#8C533A] shadow-sm' : 'text-gray-500 hover:text-[#4A2B1D]'
               }`}
             >
               เข้าสู่ระบบ
             </button>
+            <button
+              type="button"
+              onClick={() => setIsLoginTab(false)}
+              className={`flex-1 py-2.5 rounded-xl transition ${
+                !isLoginTab ? 'bg-white text-[#8C533A] shadow-sm' : 'text-gray-500 hover:text-[#4A2B1D]'
+              }`}
+            >
+              สมัครสมาชิก
+            </button>
           </div>
 
+          {/* ฟอร์มเข้าสู่ระบบ / สมัครสมาชิก */}
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             {!isLoginTab && (
               <div className="space-y-1">
-                <label className="font-semibold block">ชื่อผู้ใช้งาน (Username)</label>
+                <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน (Username)</label>
                 <input
                   type="text"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
-                  placeholder="เช่น น้องมิลค์สายอ่าน"
-                  className="w-full px-4 py-3 bg-[#FAF7F0] border border-pink-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-300"
+                  placeholder="เช่น blueii"
+                  className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
                   required={!isLoginTab}
                 />
               </div>
             )}
 
             <div className="space-y-1">
-              <label className="font-semibold block">อีเมล (Email)</label>
+              <label className="font-semibold block text-[#4A2B1D]">อีเมล (Email)</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
-                className="w-full px-4 py-3 bg-[#FAF7F0] border border-pink-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-300"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
                 required
               />
             </div>
 
             <div className="space-y-1">
-              <label className="font-semibold block">รหัสผ่าน (Password)</label>
+              <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน (Password)</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full px-4 py-3 bg-[#FAF7F0] border border-pink-100 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-300"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
                 required
               />
             </div>
@@ -177,34 +156,36 @@ function Auth() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50"
+              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2"
             >
               {isLoading ? 'กำลังดำเนินการ...' : isLoginTab ? 'เข้าสู่ระบบ' : 'สมัครสมาชิก'}
             </button>
           </form>
 
-          <div className="pt-4 border-t border-pink-50 text-center space-y-2">
+          {/* ปุ่มทางลัด Admin */}
+          <div className="pt-4 border-t border-[#F4EFE6] text-center space-y-2">
             <button
               type="button"
               onClick={handleAdminLogin}
-              className="w-full py-2 bg-purple-50 hover:bg-purple-100 text-purple-600 rounded-2xl font-bold text-xs transition border border-purple-200"
+              className="w-full py-2.5 bg-[#F4EFE6] hover:bg-[#E8DCC4] text-[#633A27] rounded-2xl font-bold text-xs transition border border-[#E8DCC4]"
             >
               👑 ทดสอบเข้าสู่ระบบในฐานะ Admin
             </button>
           </div>
 
-          <div className="text-center text-xs text-slate-400">
+          {/* ลิงก์สลับแท็บ */}
+          <div className="text-center text-xs text-gray-500">
             {isLoginTab ? (
               <p>
                 ยังไม่มีบัญชีผู้ใช้ใช่ไหม?{' '}
-                <button type="button" onClick={() => setIsLoginTab(false)} className="text-pink-500 font-bold hover:underline">
+                <button type="button" onClick={() => setIsLoginTab(false)} className="text-[#8C533A] font-bold hover:underline">
                   สมัครสมาชิกที่นี่
                 </button>
               </p>
             ) : (
               <p>
-                มีบัญชีผู้ใช้อยู่แล้ว?{' '}
-                <button type="button" onClick={() => setIsLoginTab(true)} className="text-pink-500 font-bold hover:underline">
+                มีบัญชีผู้ใช้อยู่อุปกรณ์แล้ว?{' '}
+                <button type="button" onClick={() => setIsLoginTab(true)} className="text-[#8C533A] font-bold hover:underline">
                   เข้าสู่ระบบที่นี่
                 </button>
               </p>
@@ -212,7 +193,8 @@ function Auth() {
           </div>
         </div>
       </div>
-      <footer className="text-center text-[11px] text-slate-400 py-4">
+
+      <footer className="text-center text-[11px] text-gray-400 py-4">
         © 2026 BookMellow Web Application. All rights reserved.
       </footer>
     </div>

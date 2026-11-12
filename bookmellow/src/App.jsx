@@ -7,6 +7,8 @@ import Onboarding from './pages/Onboarding';
 import Auth from './pages/Auth';
 import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/AdminDashboard';
+import UserDashboard from './pages/UserDashboard';
+import ManageBooks from './pages/ManageBooks';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/auth" element={<Auth />} />
         <Route path="/favorites" element={<Favorites />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/user" element={<UserDashboard />} />
+        <Route path="/admin/manage-books" element={<ManageBooks />} />
         <Route 
           path="/admin" 
           element={

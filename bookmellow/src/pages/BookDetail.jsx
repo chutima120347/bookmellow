@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../services/api';
+import { booksData } from '../data/data';
 import BookCover from '../components/BookCover';
 
 function BookDetail() {
@@ -18,29 +19,43 @@ function BookDetail() {
   const [userRating, setUserRating] = useState(5);
   const [reviewComment, setReviewComment] = useState('');
   const [reviewsList, setReviewsList] = useState([]);
+  const [activeTab, setActiveTab] = useState('description');
 
-  // ดึงข้อมูลรายละเอียดหนังสือ และสถานะรายการโปรด
+  // ดึงข้อมูลรายละเอียดหนังสือ
   useEffect(() => {
     async function loadBookData() {
       try {
         setIsLoading(true);
-        // 1. ดึงรายละเอียดหนังสือ (GET /api/books/{id})
-        const bookRes = await apiRequest(`/api/books/${id}`);
-        setBook(bookRes.data || bookRes);
-
-        // 2. ดึงรีวิวของหนังสือ (GET /api/books/{id}/reviews)
+        
+        // 1. ลองยิง API ดึงข้อมูล
+        let foundBook = null;
         try {
-          const reviewRes = await apiRequest(`/api/books/${id}/reviews`);
-          setReviewsList(reviewRes.reviews || []);
-        } catch (err) {
-          console.error('Failed to load reviews:', err);
+          const bookRes = await apiRequest(`/api/books/${id}`);
+          foundBook = bookRes?.data || bookRes;
+        } catch (apiErr) {
+          console.warn('API connection failed, falling back to local booksData:', apiErr);
         }
 
-        // 3. ตรวจสอบว่าเล่มนี้อยู่ในรายการโปรดหรือไม่ (ถ้าล็อกอินอยู่)
+        // 2. ถ้า API ไม่มีข้อมูล หรือยิงไม่ผ่าน ให้ค้นหาจาก booksData ในเครื่อง
+        if (!foundBook && Array.isArray(booksData)) {
+          foundBook = booksData.find((b) => String(b.id) === String(id));
+        }
+
+        setBook(foundBook || null);
+
+        // 3. ดึงรีวิวของหนังสือ
+        try {
+          const reviewRes = await apiRequest(`/api/books/${id}/reviews`);
+          setReviewsList(reviewRes?.reviews || reviewRes?.data || []);
+        } catch (err) {
+          setReviewsList([]);
+        }
+
+        // 4. ตรวจสอบรายการโปรด
         if (isLoggedIn) {
           try {
             const favRes = await apiRequest('/api/me/favorites');
-            const favs = favRes.data || [];
+            const favs = favRes?.data || favRes || [];
             setIsFavorite(favs.some((b) => String(b.id) === String(id)));
           } catch (err) {
             console.error('Failed to check favorites:', err);
@@ -58,7 +73,6 @@ function BookDetail() {
     }
   }, [id, isLoggedIn]);
 
-  // สลับสถานะเพิ่ม/ลบรายการโปรด
   const handleToggleFavorite = async () => {
     if (!isLoggedIn) {
       setShowAuthModal(true);
@@ -67,11 +81,9 @@ function BookDetail() {
 
     try {
       if (isFavorite) {
-        // DELETE /api/me/favorites/{book_id}
         await apiRequest(`/api/me/favorites/${book.id}`, { method: 'DELETE' });
         setIsFavorite(false);
       } else {
-        // POST /api/me/favorites -> Payload: { book_id: book.id }
         await apiRequest('/api/me/favorites', {
           method: 'POST',
           body: JSON.stringify({ book_id: book.id }),
@@ -79,11 +91,11 @@ function BookDetail() {
         setIsFavorite(true);
       }
     } catch (err) {
-      alert(err.message || 'เกิดข้อผิดพลาดในการอัปเดตรายการโปรด');
+      // สลับสถานะในฝั่ง Frontend เมื่อไม่มี API
+      setIsFavorite(!isFavorite);
     }
   };
 
-  // ส่งรีวิวใหม่ (POST /api/books/{id}/reviews)
   const handleSubmitReview = async (e) => {
     e.preventDefault();
     if (!isLoggedIn) {
@@ -92,35 +104,32 @@ function BookDetail() {
     }
     if (!reviewComment.trim()) return;
 
+    const newReview = {
+      id: Date.now(),
+      user_id: 'me',
+      username: 'คุณ',
+      rating: userRating,
+      comment: reviewComment,
+      created_at: new Date().toISOString(),
+    };
+
     try {
-      const res = await apiRequest(`/api/books/${id}/reviews`, {
+      await apiRequest(`/api/books/${id}/reviews`, {
         method: 'POST',
-        body: JSON.stringify({
-          rating: userRating,
-          comment: reviewComment,
-        }),
+        body: JSON.stringify({ rating: userRating, comment: reviewComment }),
       });
-
-      const newReview = res.review || {
-        id: Date.now(),
-        user_id: 'me',
-        username: 'คุณ (นักอ่าน)',
-        rating: userRating,
-        comment: reviewComment,
-        created_at: new Date().toISOString(),
-      };
-
-      setReviewsList([newReview, ...reviewsList]);
-      setReviewComment('');
-      alert('ขอบคุณสำหรับรีวิวสุดคิ้วท์น้า! 🌸');
     } catch (err) {
-      alert(err.message || 'ไม่สามารถส่งรีวิวได้');
+      console.warn('API review failed, adding locally');
     }
+
+    setReviewsList([newReview, ...reviewsList]);
+    setReviewComment('');
+    alert('ขอบคุณสำหรับรีวิว!');
   };
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FAF7F0] flex items-center justify-center text-xs text-slate-400">
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center text-xs text-gray-400">
         กำลังโหลดข้อมูลหนังสือ...
       </div>
     );
@@ -128,13 +137,13 @@ function BookDetail() {
 
   if (!book) {
     return (
-      <div className="min-h-screen bg-[#FAF7F0] flex flex-col items-center justify-center space-y-4 text-[#4A3E3D]">
+      <div className="min-h-screen bg-[#FDFBF7] flex flex-col items-center justify-center space-y-4 text-[#4A2B1D]">
         <p className="text-sm font-bold">ไม่พบข้อมูลหนังสือเล่มนี้</p>
         <button
           onClick={() => navigate('/explore')}
-          className="px-4 py-2 bg-[#FF9EAA] text-white rounded-full text-xs font-semibold"
+          className="px-5 py-2 bg-[#8C533A] text-white rounded-full text-xs font-semibold hover:bg-[#633A27] transition"
         >
-          กลับไปเลือกค้นหาหนังสือ
+          กลับไปค้นหาหนังสือ
         </button>
       </div>
     );
@@ -144,148 +153,229 @@ function BookDetail() {
     ? book.categories.join(', ')
     : (book.category || 'ทั่วไป');
 
+  const mainCategory = Array.isArray(book.categories) && book.categories.length > 0
+    ? book.categories[0]
+    : categoryText;
+
+  const averageRating = reviewsList.length > 0
+    ? (reviewsList.reduce((acc, r) => acc + (r.rating || 5), 0) / reviewsList.length).toFixed(1)
+    : (book.rating || '4.8');
+
   return (
-    <div className="min-h-screen bg-[#FAF7F0] text-[#4A3E3D]">
+    <div className="min-h-screen bg-[#FDFBF7] text-[#4A2B1D] font-sans">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm grid md:grid-cols-3 gap-8">
-          <div className="flex flex-col items-center">
-            <div className="relative w-full max-w-[240px] aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-[#FAF7F0]">
-              <BookCover src={book.cover_url || book.cover} title={book.title} />
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
+        
+        {/* Main Info */}
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DCC4] shadow-sm grid md:grid-cols-3 gap-8">
+          
+          <div className="flex flex-col items-center space-y-4">
+            <div className="relative w-full max-w-[240px] aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-[#F4EFE6] border border-[#E8DCC4]">
+              {BookCover ? (
+                <BookCover src={book.cover_url || book.cover} title={book.title} />
+              ) : (
+                <img
+                  src={book.cover_url || book.cover}
+                  alt={book.title}
+                  className="w-full h-full object-cover"
+                />
+              )}
               
-              <span className="absolute top-3 left-3 text-xs font-semibold px-3 py-1 rounded-full border bg-white/90 backdrop-blur-md bg-pink-100 text-pink-600">
-                {Array.isArray(book.categories) && book.categories.length > 0 ? book.categories[0] : categoryText}
+              <span className="absolute top-3 left-3 text-[11px] font-semibold px-3 py-1 rounded-full border bg-white/95 text-[#8C533A] border-[#E8DCC4] shadow-sm">
+                {mainCategory}
               </span>
             </div>
 
             <button
               onClick={handleToggleFavorite}
-              className={`w-full max-w-[240px] mt-4 py-2.5 rounded-full font-semibold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 ${
+              className={`w-full max-w-[240px] py-2.5 rounded-full font-semibold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 ${
                 isFavorite 
-                  ? 'bg-pink-100 text-pink-600 border border-pink-200' 
-                  : 'bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white'
+                  ? 'bg-[#F4EFE6] text-[#8C533A] border border-[#E8DCC4]' 
+                  : 'bg-[#8C533A] hover:bg-[#633A27] text-white'
               }`}
             >
               <span>{isFavorite ? '💖 อยู่ในรายการโปรดแล้ว' : '🤍 เพิ่มลงรายการโปรด'}</span>
             </button>
           </div>
 
-          <div className="md:col-span-2 space-y-4">
+          <div className="md:col-span-2 space-y-5">
             <div>
-              <span className="text-xs px-3 py-1 bg-pink-50 text-pink-500 rounded-full border border-pink-100 font-semibold">
+              <span className="text-xs px-3 py-1 bg-[#F4EFE6] text-[#8C533A] rounded-full border border-[#E8DCC4] font-semibold">
                 หมวดหมู่: {categoryText}
               </span>
-              <h1 className="text-2xl sm:text-3xl font-bold mt-2">{book.title}</h1>
-              <p className="text-xs sm:text-sm text-slate-400 mt-1">
-                โดย <span className="text-slate-600 font-medium">{book.author}</span>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#4A2B1D] mt-3 leading-snug">
+                {book.title}
+              </h1>
+              {book.subtitle && (
+                <p className="text-xs sm:text-sm text-gray-500 mt-1">{book.subtitle}</p>
+              )}
+              <p className="text-xs sm:text-sm text-gray-500 mt-2">
+                ผู้เขียน: <span className="text-[#633A27] font-semibold">{book.author}</span>
+                {book.publisher && ` | สำนักพิมพ์: ${book.publisher}`}
                 {book.published_year && ` | ปีที่พิมพ์: ${book.published_year}`}
               </p>
             </div>
 
-            <div className="bg-[#FAF7F0] p-4 rounded-2xl border border-pink-100">
-              <h4 className="font-bold text-xs text-pink-500 flex items-center gap-1 mb-1">
-                <span>🎯</span> เหตุผลที่แนะนำสำหรับคุณ
-              </h4>
-              <p className="text-xs text-slate-600">{book.reason || 'หนังสือฮีลใจยอดนิยม'}</p>
+            <div className="flex items-center gap-2 text-xs text-amber-500 bg-[#FDFBF7] p-3 rounded-xl border border-[#E8DCC4] w-fit">
+              <span className="text-sm">★</span>
+              <span className="font-bold text-[#4A2B1D] text-sm">{averageRating}</span>
+              <span className="text-gray-400">({reviewsList.length} รีวิวจากผู้อ่าน)</span>
             </div>
 
-            <div>
-              <h3 className="font-bold text-sm mb-1">เรื่องย่อ</h3>
-              <p className="text-xs sm:text-sm text-slate-500 leading-relaxed bg-white p-3 rounded-xl border border-gray-100">
-                {book.description || book.synopsis || 'ไม่มีข้อมูลเรื่องย่อ'}
+            <div className="bg-[#F4EFE6] p-4 rounded-2xl border border-[#E8DCC4]">
+              <h4 className="font-bold text-xs text-[#8C533A] flex items-center gap-1.5 mb-1">เหตุผลที่แนะนำสำหรับคุณ</h4>
+              <p className="text-xs text-gray-700 leading-relaxed">
+                {book.reason || book.recommendation_reason || 'หนังสือฮีลใจและสร้างแรงบันดาลใจยอดนิยม'}
               </p>
             </div>
           </div>
         </div>
 
-        {/* Reviews Section */}
-        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-pink-100 shadow-sm space-y-6">
-          <h3 className="text-lg font-bold flex items-center gap-2">
-            <span>💬</span> รีวิวและความคิดเห็นจากนักอ่าน
-          </h3>
-
-          <div className="bg-[#FAF7F0] p-4 sm:p-5 rounded-2xl border border-pink-100">
-            {isLoggedIn ? (
-              <form onSubmit={handleSubmitReview} className="space-y-3">
-                <h4 className="font-semibold text-xs">เขียนรีวิวให้เรื่องนี้:</h4>
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-slate-500">ให้คะแนน:</span>
-                  <div className="flex gap-1 text-amber-400 text-lg cursor-pointer">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <span key={star} onClick={() => setUserRating(star)} className="hover:scale-110 transition">
-                        {star <= userRating ? '★' : '☆'}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                <textarea
-                  rows="3"
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  placeholder="แชร์ความรู้สึกของคุณหลังอ่านเรื่องนี้..."
-                  required
-                  className="w-full p-3 bg-white border border-pink-200 rounded-xl text-xs focus:outline-none"
-                ></textarea>
-
-                <button type="submit" className="px-5 py-2 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white rounded-full text-xs font-semibold shadow-sm transition">
-                  ส่งรีวิวสุดคิ้วท์ 🌸
-                </button>
-              </form>
-            ) : (
-              <div className="text-center py-4 space-y-2">
-                <p className="text-xs text-slate-500">🔒 กรุณาเข้าสู่ระบบก่อนเขียนรีวิวและให้คะแนนหนังสือ</p>
-                <button onClick={() => setShowAuthModal(true)} className="px-4 py-1.5 bg-[#FF9EAA] text-white rounded-full text-xs font-semibold">
-                  เข้าสู่ระบบเพื่อเขียนรีวิว
-                </button>
-              </div>
-            )}
+        {/* Tabs */}
+        <section className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DCC4] shadow-sm space-y-6">
+          <div className="flex border-b border-[#E8DCC4] gap-6 text-xs sm:text-sm font-bold">
+            <button
+              onClick={() => setActiveTab('description')}
+              className={`pb-3 transition relative ${
+                activeTab === 'description'
+                  ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
+                  : 'text-gray-400 hover:text-[#4A2B1D]'
+              }`}
+            >
+              เรื่องย่อ
+            </button>
+            <button
+              onClick={() => setActiveTab('details')}
+              className={`pb-3 transition relative ${
+                activeTab === 'details'
+                  ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
+                  : 'text-gray-400 hover:text-[#4A2B1D]'
+              }`}
+            >
+              ข้อมูลหนังสือ
+            </button>
+            <button
+              onClick={() => setActiveTab('reviews')}
+              className={`pb-3 transition relative ${
+                activeTab === 'reviews'
+                  ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
+                  : 'text-gray-400 hover:text-[#4A2B1D]'
+              }`}
+            >
+              รีวิวจากผู้อ่าน ({reviewsList.length})
+            </button>
           </div>
 
-          <div className="space-y-3">
-            {reviewsList.length > 0 ? (
-              reviewsList.map((rev) => (
-                <div key={rev.id} className="p-4 rounded-2xl bg-[#FAF7F0]/50 border border-pink-100/60 space-y-2">
-                  <div className="flex items-center justify-between">
+          {activeTab === 'description' && (
+            <div className="space-y-3">
+              <p className="text-xs sm:text-sm text-gray-700 leading-relaxed bg-[#FDFBF7] p-5 rounded-2xl border border-[#E8DCC4]/60 whitespace-pre-line">
+                {book.description || book.synopsis || 'ยังไม่มีข้อมูลเรื่องย่อสำหรับหนังสือเล่มนี้'}
+              </p>
+            </div>
+          )}
+
+          {activeTab === 'details' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-700 bg-[#FDFBF7] p-5 rounded-2xl border border-[#E8DCC4]/60">
+              <p><strong>ชื่อเรื่อง:</strong> {book.title}</p>
+              <p><strong>ผู้แต่ง:</strong> {book.author}</p>
+              <p><strong>สำนักพิมพ์:</strong> {book.publisher || '-'}</p>
+              <p><strong>หมวดหมู่:</strong> {categoryText}</p>
+              <p><strong>จำนวนหน้า:</strong> {book.pages ? `${book.pages} หน้า` : '-'}</p>
+              <p><strong>เลข ISBN:</strong> {book.isbn || '-'}</p>
+              <p><strong>ปีที่พิมพ์:</strong> {book.published_year || '-'}</p>
+              <p><strong>ภาษา:</strong> {book.language || 'ภาษาไทย'}</p>
+            </div>
+          )}
+
+          {activeTab === 'reviews' && (
+            <div className="space-y-6">
+              <div className="bg-[#F4EFE6] p-5 rounded-2xl border border-[#E8DCC4]">
+                {isLoggedIn ? (
+                  <form onSubmit={handleSubmitReview} className="space-y-3">
+                    <h4 className="font-semibold text-xs text-[#4A2B1D]">เขียนรีวิวให้เรื่องนี้:</h4>
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center text-xs">
-                        🌸
-                      </div>
-                      <div>
-                        <h5 className="text-xs font-bold">{rev.username || rev.user || 'นักอ่าน'}</h5>
-                        <span className="text-[10px] text-slate-400">
-                          {rev.created_at ? new Date(rev.created_at).toLocaleDateString('th-TH') : (rev.date || 'วันนี้')}
-                        </span>
+                      <span className="text-xs text-gray-600">ให้คะแนน:</span>
+                      <div className="flex gap-1 text-amber-500 text-lg cursor-pointer">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span key={star} onClick={() => setUserRating(star)} className="hover:scale-110 transition">
+                            {star <= userRating ? '★' : '☆'}
+                          </span>
+                        ))}
                       </div>
                     </div>
-                    <div className="text-amber-400 text-xs font-bold">
-                      {'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)} ({rev.rating}.0)
-                    </div>
+                    <textarea
+                      rows="3"
+                      value={reviewComment}
+                      onChange={(e) => setReviewComment(e.target.value)}
+                      placeholder="แชร์ความรู้สึกของคุณหลังอ่านเรื่องนี้..."
+                      required
+                      className="w-full p-3 bg-white border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                    ></textarea>
+                    <button type="submit" className="px-5 py-2 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-full text-xs font-semibold shadow-sm transition">
+                      ส่งรีวิว
+                    </button>
+                  </form>
+                ) : (
+                  <div className="text-center py-4 space-y-2">
+                    <p className="text-xs text-gray-600">กรุณาเข้าสู่ระบบก่อนเขียนรีวิวและให้คะแนนหนังสือ</p>
+                    <button onClick={() => setShowAuthModal(true)} className="px-4 py-1.5 bg-[#8C533A] text-[#FDFBF7] rounded-full text-xs font-semibold hover:bg-[#633A27] transition">
+                      เข้าสู่ระบบเพื่อเขียนรีวิว
+                    </button>
                   </div>
-                  <p className="text-xs text-slate-600 leading-relaxed">"{rev.comment}"</p>
-                </div>
-              ))
-            ) : (
-              <p className="text-center text-xs text-slate-400 py-4">ยังไม่มีรีวิวสำหรับหนังสือเล่มนี้ มารีวิวเป็นคนแรกกันนะ! 🌸</p>
-            )}
-          </div>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                {reviewsList.length > 0 ? (
+                  reviewsList.map((rev) => {
+                    const currentRating = Math.max(0, Math.min(5, rev.rating || 5));
+                    return (
+                      <div key={rev.id} className="p-4 rounded-2xl bg-[#FDFBF7] border border-[#E8DCC4] space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-[#F4EFE6] border border-[#E8DCC4] flex items-center justify-center text-xs">
+                            </div>
+                            <div>
+                              <h5 className="text-xs font-bold text-[#4A2B1D]">{rev.username || rev.user || 'นักอ่าน'}</h5>
+                              <span className="text-[10px] text-gray-400">
+                                {rev.created_at ? new Date(rev.created_at).toLocaleDateString('th-TH') : (rev.date || 'วันนี้')}
+                              </span>
+                            </div>
+                          </div>
+                          <div className="text-amber-500 text-xs font-bold">
+                            {'★'.repeat(currentRating)}{'☆'.repeat(5 - currentRating)} ({currentRating}.0)
+                          </div>
+                        </div>
+                        <p className="text-xs text-gray-700 leading-relaxed pl-10">"{rev.comment}"</p>
+                      </div>
+                    );
+                  })
+                ) : (
+                  <p className="text-center text-xs text-gray-400 py-6">ยังไม่มีรีวิวสำหรับหนังสือเล่มนี้ มารีวิวเป็นคนแรกกันนะ!</p>
+                )}
+              </div>
+            </div>
+          )}
         </section>
       </main>
 
       {showAuthModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-sm rounded-3xl p-6 text-center space-y-4 border-2 border-pink-100 shadow-lg">
-            <h3 className="font-bold text-base">ต้องเข้าสู่ระบบก่อนใช้งาน</h3>
-            <p className="text-xs text-slate-500">กรุณาเข้าสู่ระบบเพื่อบันทึกรายการโปรดและเขียนรีวิวหนังสือเล่มนี้</p>
+          <div className="bg-white w-full max-w-sm rounded-2xl p-6 text-center space-y-4 border border-[#E8DCC4] shadow-lg">
+            <h3 className="font-bold text-base text-[#4A2B1D]">ต้องเข้าสู่ระบบก่อนใช้งาน</h3>
+            <p className="text-xs text-gray-500">กรุณาเข้าสู่ระบบเพื่อบันทึกรายการโปรดและเขียนรีวิวหนังสือเล่มนี้</p>
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setShowAuthModal(false)} className="flex-1 py-2 bg-gray-100 text-slate-600 rounded-full text-xs font-semibold">ยกเลิก</button>
-              <button onClick={() => { setShowAuthModal(false); navigate('/auth'); }} className="flex-1 py-2 bg-[#FF9EAA] text-white rounded-full text-xs font-semibold">ไปหน้าเข้าสู่ระบบ</button>
+              <button onClick={() => setShowAuthModal(false)} className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold hover:bg-gray-200 transition">
+                ยกเลิก
+              </button>
+              <button onClick={() => { setShowAuthModal(false); navigate('/auth'); }} className="flex-1 py-2 bg-[#8C533A] text-white rounded-full text-xs font-semibold hover:bg-[#633A27] transition">
+                ไปหน้าเข้าสู่ระบบ
+              </button>
             </div>
           </div>
         </div>
       )}
-
       <Footer />
     </div>
   );
