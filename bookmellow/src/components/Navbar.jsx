@@ -104,8 +104,7 @@ function Navbar() {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 title="ข้อมูลส่วนตัว"
-                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition"
-              >
+                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition">
                 {userInitial}
               </button>
 
@@ -121,28 +120,8 @@ function Navbar() {
                       setIsDropdownOpen(false);
                       navigate('/profile');
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
-                  >
-                    <span>👤</span> โปรไฟล์ของฉัน
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      navigate('/interests');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
-                  >
-                    <span>✨</span> เลือกความสนใจ
-                  </button>
-
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      navigate('/favorites');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
-                  >รายการโปรด
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2">
+                      โปรไฟล์ของฉัน
                   </button>
 
                   {user?.isAdmin && (
@@ -169,8 +148,7 @@ function Navbar() {
           ) : (
             <button
               onClick={() => navigate('/auth')}
-              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0"
-            >
+              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0">
               เข้าสู่ระบบ
             </button>
           )}
