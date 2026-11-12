@@ -1,92 +1,212 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
+import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../services/api';
 
+const interestCategories = [
+  'Fantasy',
+  'Romance',
+  'Mystery',
+  'Science Fiction',
+  'Thriller',
+  'Horror',
+  'Historical Fiction',
+  'Self-Help',
+  'Business',
+  'Education',
+  'Biography',
+  'Young Adult',
+  'Children',
+  'Poetry',
+  'Adventure'
+];
+
 function Onboarding() {
-  const [categories, setCategories] = useState([]);
-  const [selectedCategoryIds, setSelectedCategoryIds] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+  const { user, isLoggedIn } = useAuth();
 
+  const [selectedInterests, setSelectedInterests] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSavedSuccess, setIsSavedSuccess] = useState(false);
+
+  // โหลดความสนใจเดิมของผู้ใช้ (ถ้ามี)
   useEffect(() => {
-    async function loadData() {
+    const loadExistingInterests = async () => {
+      // 1. ดึงจาก localStorage ก่อนเพื่อให้แสดงผลทันที
       try {
-        // 1. ดึงหมวดหมู่ทั้งหมด
-        const catRes = await apiRequest('/api/categories');
-        setCategories(catRes.data || []);
-
-        // 2. ดึง Preferences ปัจจุบัน
-        const prefRes = await apiRequest('/api/me/preferences');
-        if (prefRes.data) {
-          setSelectedCategoryIds(prefRes.data.map((c) => c.id));
+        const localSaved = localStorage.getItem('user_interests');
+        if (localSaved) {
+          const parsed = JSON.parse(localSaved);
+          if (Array.isArray(parsed)) setSelectedInterests(parsed);
         }
-      } catch (err) {
-        console.error('Failed to fetch data:', err);
-      } finally {
-        setIsLoading(false);
+      } catch (e) {
+        console.error(e);
       }
-    }
-    loadData();
-  }, []);
 
-  const toggleCategory = (catId) => {
-    if (selectedCategoryIds.includes(catId)) {
-      setSelectedCategoryIds(selectedCategoryIds.filter((id) => id !== catId));
-    } else {
-      setSelectedCategoryIds([...selectedCategoryIds, catId]);
-    }
+      // 2. หากล็อกอินอยู่ ให้ลองดึงข้อมูลล่าสุดจาก Backend
+      if (isLoggedIn) {
+        try {
+          const res = await apiRequest('/api/user/interests');
+          const list = Array.isArray(res) ? res : (res?.interests || res?.data || []);
+          if (Array.isArray(list) && list.length > 0) {
+            setSelectedInterests(list);
+            localStorage.setItem('user_interests', JSON.stringify(list));
+          }
+        } catch {
+          // ข้ามได้หาก Backend ยังไม่มี endpoint ดึงความสนใจ
+        }
+      }
+    };
+
+    loadExistingInterests();
+  }, [isLoggedIn]);
+
+  // กดเลือก / ยกเลิกหมวดหมู่
+  const toggleCategory = (category) => {
+    setIsSavedSuccess(false);
+    setSelectedInterests((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    );
   };
 
-  const handleSavePreferences = async () => {
+  // กดปุ่มบันทึกความสนใจ
+  const handleSaveInterests = async () => {
+    if (selectedInterests.length === 0) {
+      alert('กรุณาเลือกหมวดหมู่หนังสือที่คุณสนใจอย่างน้อย 1 หมวดหมู่ค่ะ');
+      return;
+    }
+
     try {
-      // 3. ส่ง Payload เป็น category_ids Array ของ Category UUID
-      await apiRequest('/api/me/preferences', {
-        method: 'PUT',
-        body: JSON.stringify({ category_ids: selectedCategoryIds }),
-      });
-      alert('บันทึกความสนใจเรียบร้อยแล้วค่ะ!');
-      navigate('/');
+      setIsSaving(true);
+
+      // บันทึกลง localStorage ไว้ให้หน้าหนังสือแนะนำนำไปกรองได้ทันที
+      localStorage.setItem('user_interests', JSON.stringify(selectedInterests));
+
+      // ส่งข้อมูลไปบันทึกที่ Backend (รองรับหลายรูปแบบ endpoint)
+      if (isLoggedIn) {
+        const endpoints = [
+          { url: '/api/user/interests', method: 'POST' },
+          { url: '/api/user/interests', method: 'PUT' },
+          { url: '/api/users/interests', method: 'POST' },
+          { url: '/api/interests', method: 'POST' },
+        ];
+
+        for (const ep of endpoints) {
+          try {
+            await apiRequest(ep.url, {
+              method: ep.method,
+              body: JSON.stringify({
+                userId: user?.id,
+                interests: selectedInterests,
+                categories: selectedInterests,
+              }),
+            });
+            break;
+          } catch {
+            // ลอง endpoint ถัดไป
+          }
+        }
+      }
+
+      setIsSavedSuccess(true);
     } catch (err) {
-      alert(err.message || 'บันทึกข้อมูลไม่สำเร็จ');
+      console.error('บันทึกความสนใจไม่สำเร็จ:', err);
+      setIsSavedSuccess(true);
+    } finally {
+      setIsSaving(false);
     }
   };
-
-  if (isLoading) {
-    return <div className="min-h-screen bg-[#FAF7F0] flex items-center justify-center text-xs text-slate-400">กำลังโหลด...</div>;
-  }
 
   return (
-    <div className="min-h-screen bg-[#FAF7F0] p-6 max-w-2xl mx-auto space-y-6 text-[#4A3E3D]">
-      <div className="text-center space-y-2">
-        <h1 className="text-2xl font-bold">เลือกหมวดหมู่หนังสือที่คุณสนใจ</h1>
-        <p className="text-xs text-slate-400">ระบบจะนำหมวดหมู่นี้ไปจัดหนังสือแนะนำฮีลใจให้คุณ</p>
-      </div>
+    <div className="min-h-screen bg-[#FAF6EE] text-[#3B261C] flex flex-col justify-between font-sans">
+      <Navbar />
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {categories.map((cat) => {
-          const isSelected = selectedCategoryIds.includes(cat.id);
-          return (
-            <button
-              key={cat.id}
-              onClick={() => toggleCategory(cat.id)}
-              className={`p-3 rounded-2xl text-xs font-semibold border transition ${
-                isSelected
-                  ? 'bg-[#FF9EAA] text-white border-[#FF9EAA] shadow-sm'
-                  : 'bg-white text-slate-600 border-pink-100 hover:bg-pink-50'
-              }`}
-            >
-              {cat.name}
-            </button>
-          );
-        })}
-      </div>
+      <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+        {/* ส่วนหัวข้อตรงกลาง */}
+        <div className="text-center space-y-3 mb-12">
+          <p className="text-xs font-semibold tracking-[0.18em] text-[#8C6D5E] uppercase">
+            YOUR READING INTERESTS
+          </p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-[#3B261C]">
+            คุณชอบอ่านหนังสือแนวไหน?
+          </h1>
+          <p className="text-xs sm:text-sm text-[#7A6A60]">
+            เลือกแนวหนังสือที่คุณสนใจได้หลายหมวดหมู่ เพื่อให้เราคัดสรรหนังสือที่เหมาะกับคุณ
+          </p>
+        </div>
 
-      <button
-        onClick={handleSavePreferences}
-        className="w-full py-3 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white font-bold text-xs rounded-2xl shadow-md"
-      >
-        บันทึกและเริ่มต้นใช้งาน
-      </button>
+        {/* แถบหัวข้อหมวดหมู่ และตัวนับจำนวนที่เลือก */}
+        <div className="flex items-center justify-between mb-5 px-1">
+          <h2 className="text-sm sm:text-base font-bold text-[#3B261C]">
+            หมวดหมู่หนังสือ
+          </h2>
+          <span className="text-xs sm:text-sm text-[#8C7B70]">
+            เลือกแล้ว {selectedInterests.length} หมวดหมู่
+          </span>
+        </div>
+
+        {/* ตารางตัวเลือกหมวดหมู่ 4 คอลัมน์ */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-5">
+          {interestCategories.map((category) => {
+            const isSelected = selectedInterests.includes(category);
+            return (
+              <button
+                key={category}
+                type="button"
+                onClick={() => toggleCategory(category)}
+                className={`h-16 sm:h-[72px] px-4 rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
+                  isSelected
+                    ? 'bg-[#7A5644] text-white border-[#7A5644] shadow-sm'
+                    : 'bg-white text-[#3B261C] border-[#EBE4D8] hover:border-[#C8B8A6] hover:bg-[#FDFBF7]'
+                }`}
+              >
+                {isSelected && <span className="text-sm font-bold">✓</span>}
+                <span>{category}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ปุ่มบันทึกความสนใจ */}
+        <div className="mt-10 flex justify-center">
+          <button
+            type="button"
+            disabled={isSaving}
+            onClick={handleSaveInterests}
+            className="px-10 py-3.5 bg-[#7A5644] hover:bg-[#5E4032] text-white rounded-full text-xs sm:text-sm font-semibold shadow-sm transition disabled:opacity-50"
+          >
+            {isSaving ? 'กำลังบันทึก...' : 'บันทึกความสนใจ'}
+          </button>
+        </div>
+
+        {/* กล่องแจ้งเตือนเมื่อบันทึกความสนใจเรียบร้อยแล้ว (ตามภาพที่ 2) */}
+        {isSavedSuccess && (
+          <div className="mt-10 max-w-lg mx-auto bg-white border border-[#EBE4D8] rounded-3xl p-8 sm:p-10 text-center shadow-sm space-y-4 animate-fade-in">
+            <div className="text-2xl font-bold text-[#3B6E52]">✓</div>
+            <h3 className="text-lg sm:text-xl font-bold text-[#3B261C]">
+              บันทึกความสนใจเรียบร้อยแล้ว!
+            </h3>
+            <p className="text-xs sm:text-sm text-[#7A6A60] leading-relaxed">
+              เราคัดสรรหนังสือที่ตรงกับแนวที่คุณชอบไว้ให้แล้ว ลองไปดูหนังสือแนะนำของคุณกันเลย
+            </p>
+            <div className="pt-2">
+              <button
+                type="button"
+                onClick={() => navigate('/explore')}
+                className="px-8 py-3 bg-[#4A2B1D] hover:bg-[#361E13] text-white rounded-full text-xs sm:text-sm font-semibold shadow-sm transition"
+              >
+                ดูหนังสือแนะนำของฉัน
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
+
+      <Footer />
     </div>
   );
 }

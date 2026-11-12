@@ -65,6 +65,8 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/onboarding" element={<Onboarding />} />
+          <Route path="/interests" element={<Onboarding />} />  
 
           {/* หน้าสำหรับ Admin เท่านั้น (ไม่ใช่ Admin จะเห็นหน้า 403) */}
           <Route
