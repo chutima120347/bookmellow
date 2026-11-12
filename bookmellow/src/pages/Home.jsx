@@ -115,9 +115,7 @@ function Home() {
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[#FDFBF7]">
               หนังสือดีๆ ที่จะทำให้ทุกวันของคุณอบอุ่นขึ้น
             </h1>
-            <p className="text-sm sm:text-base text-[#E8DCC4] leading-relaxed">
-              ค้นพบหนังสือและเรื่องราวสุดประทับใจที่เหมาะกับคุณวันนี้
-            </p>
+            <p className="text-sm sm:text-base text-[#E8DCC4] leading-relaxed">ค้นพบหนังสือและเรื่องราวสุดประทับใจที่เหมาะกับคุณวันนี้</p>
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => navigate('/explore')}

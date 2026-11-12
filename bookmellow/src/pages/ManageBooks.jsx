@@ -18,7 +18,6 @@ function ManageBooks() {
   const [isSaving, setIsSaving] = useState(false);
   const [search, setSearch] = useState('');
 
-  // States สำหรับ Form เพิ่ม/แก้ไขหนังสือ
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [title, setTitle] = useState('');
@@ -128,7 +127,7 @@ function ManageBooks() {
       }
 
       setIsModalOpen(false);
-      fetchBooks(); // โหลดข้อมูลล่าสุดจากเซิร์ฟเวอร์มาแสดงทันที
+      fetchBooks();
     } catch (err) {
       alert(err.message || 'ไม่สามารถบันทึกข้อมูลได้ กรุณาตรวจสอบสิทธิ์ Admin');
     } finally {
@@ -158,39 +157,27 @@ function ManageBooks() {
       <Navbar />
 
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 sm:px-8 py-10 space-y-6">
-        
-        {/* ปุ่มย้อนกลับไปหน้า Dashboard */}
         <div>
           <button
             onClick={() => navigate('/admin')}
-            className="text-xs font-medium text-[#7A756E] hover:text-[#1E1C1A] transition inline-flex items-center gap-1"
-          >
-            <span>←</span>
+            className="text-xs font-medium text-[#7A756E] hover:text-[#1E1C1A] transition inline-flex items-center gap-1">
             <span>กลับไปหน้า Admin Dashboard</span>
           </button>
         </div>
 
-        {/* Header & ปุ่มเพิ่มหนังสือ */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="space-y-1">
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1C1A]">
-              จัดการหนังสือในระบบ
-            </h1>
-            <p className="text-xs sm:text-sm text-[#7A756E]">
-              เพิ่ม แก้ไข และลบรายการหนังสือทั้งหมด ({books.length} เล่ม)
-            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1C1A]">จัดการหนังสือในระบบ</h1>
+            <p className="text-xs sm:text-sm text-[#7A756E]">เพิ่ม แก้ไข และลบรายการหนังสือทั้งหมด ({books.length} เล่ม)</p>
           </div>
 
           <button
             onClick={handleOpenAddModal}
-            className="px-6 py-3 bg-[#232129] hover:bg-[#36333F] text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm flex items-center gap-2 self-start sm:self-auto transition"
-          >
-            <span>+</span>
-            <span>เพิ่มหนังสือใหม่</span>
+            className="px-6 py-3 bg-[#232129] hover:bg-[#36333F] text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm flex items-center gap-2 self-start sm:self-auto transition">
+            <span>+ เพิ่มหนังสือใหม่</span>
           </button>
         </div>
 
-        {/* ช่องค้นหาหนังสือ */}
         <div className="bg-[#F3EFE8]/80 p-4 rounded-2xl border border-[#E6E0D6]">
           <input
             type="text"
@@ -201,12 +188,9 @@ function ManageBooks() {
           />
         </div>
 
-        {/* ตารางแสดงรายการหนังสือ */}
         <div className="bg-white rounded-2xl border border-[#E6E0D6] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-x-auto">
           {isLoading ? (
-            <div className="text-center py-12 text-xs text-[#7A756E]">
-              กำลังโหลดรายการหนังสือจากเซิร์ฟเวอร์...
-            </div>
+            <div className="text-center py-12 text-xs text-[#7A756E]">กำลังโหลดรายการหนังสือจากเซิร์ฟเวอร์...</div>
           ) : (
             <table className="w-full text-left text-xs">
               <thead className="bg-[#F3EFE8] border-b border-[#E6E0D6] text-[#1E1C1A] font-semibold">
@@ -236,24 +220,16 @@ function ManageBooks() {
                         </td>
                         <td className="p-4 text-[#7A756E]">{b.author}</td>
                         <td className="p-4">
-                          <span className="px-3 py-1 bg-[#F3EFE8] text-[#4A4640] rounded-full text-[11px] font-medium border border-[#E6E0D6]">
-                            {displayCat}
-                          </span>
+                          <span className="px-3 py-1 bg-[#F3EFE8] text-[#4A4640] rounded-full text-[11px] font-medium border border-[#E6E0D6]">{displayCat}</span>
                         </td>
                         <td className="p-4 text-center">
                           <div className="flex items-center justify-center gap-2">
                             <button
                               onClick={() => handleOpenEditModal(b)}
-                              className="px-3.5 py-1.5 bg-[#F3EFE8] text-[#1E1C1A] border border-[#E6E0D6] rounded-lg text-[11px] font-medium hover:bg-[#E6E0D6] transition"
-                            >
-                              แก้ไข
-                            </button>
+                              className="px-3.5 py-1.5 bg-[#F3EFE8] text-[#1E1C1A] border border-[#E6E0D6] rounded-lg text-[11px] font-medium hover:bg-[#E6E0D6] transition">แก้ไข</button>
                             <button
                               onClick={() => handleDeleteBook(b.id, b.title)}
-                              className="px-3.5 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-medium hover:bg-rose-100 transition"
-                            >
-                              ลบ
-                            </button>
+                              className="px-3.5 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-medium hover:bg-rose-100 transition">ลบ</button>
                           </div>
                         </td>
                       </tr>
@@ -261,9 +237,7 @@ function ManageBooks() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan="4" className="text-center py-10 text-[#7A756E]">
-                      ไม่พบรายการหนังสือที่คุณค้นหา
-                    </td>
+                    <td colSpan="4" className="text-center py-10 text-[#7A756E]">ไม่พบรายการหนังสือที่คุณค้นหา</td>
                   </tr>
                 )}
               </tbody>
@@ -272,37 +246,22 @@ function ManageBooks() {
         </div>
       </main>
 
-      {/* Modal เพิ่ม / แก้ไข หนังสือ */}
       {isModalOpen && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-md rounded-2xl p-6 space-y-4 border border-[#E6E0D6] shadow-xl max-h-[90vh] overflow-y-auto">
-            <h3 className="font-bold text-base text-[#1E1C1A]">
-              {editingId ? 'แก้ไขข้อมูลหนังสือ' : 'เพิ่มหนังสือใหม่'}
-            </h3>
+            <h3 className="font-bold text-base text-[#1E1C1A]">{editingId ? 'แก้ไขข้อมูลหนังสือ' : 'เพิ่มหนังสือใหม่'}</h3>
 
             <form onSubmit={handleSaveBook} className="space-y-3 text-xs">
               <div>
                 <label className="block mb-1 font-medium text-[#1E1C1A]">ชื่อหนังสือ *</label>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="กรอกชื่อหนังสือ"
-                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"
-                />
+                <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} placeholder="กรอกชื่อหนังสือ"
+                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"/>
               </div>
 
               <div>
                 <label className="block mb-1 font-medium text-[#1E1C1A]">ผู้แต่ง *</label>
-                <input
-                  type="text"
-                  required
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="กรอกชื่อผู้แต่ง"
-                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"
-                />
+                <input type="text" required value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="กรอกชื่อผู้แต่ง"
+                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"/>
               </div>
 
               <div>
@@ -310,23 +269,11 @@ function ManageBooks() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"
-                >
+                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]">
                   {categoryOptions.map((cat) => (
                     <option key={cat} value={cat}>{cat}</option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block mb-1 font-medium text-[#1E1C1A]">ลิงก์รูปภาพหน้าปก (URL)</label>
-                <input
-                  type="url"
-                  value={coverUrl}
-                  onChange={(e) => setCoverUrl(e.target.value)}
-                  placeholder="https://example.com/cover.jpg"
-                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"
-                />
               </div>
 
               <div>
@@ -336,26 +283,14 @@ function ManageBooks() {
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="กรอกรายละเอียดหรือเรื่องย่อของหนังสือ..."
-                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"
-                />
+                  className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"/>
               </div>
 
               <div className="flex gap-2 pt-3">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  disabled={isSaving}
-                  className="flex-1 py-2.5 bg-[#F3EFE8] text-[#4A4640] rounded-xl font-medium hover:bg-[#E6E0D6] transition"
-                >
-                  ยกเลิก
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="flex-1 py-2.5 bg-[#232129] text-white rounded-xl font-medium hover:bg-[#36333F] transition disabled:opacity-50"
-                >
-                  {isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}
-                </button>
+                <button type="button" onClick={() => setIsModalOpen(false)} disabled={isSaving}
+                  className="flex-1 py-2.5 bg-[#F3EFE8] text-[#4A4640] rounded-xl font-medium hover:bg-[#E6E0D6] transition">ยกเลิก</button>
+                <button type="submit" disabled={isSaving}
+                  className="flex-1 py-2.5 bg-[#232129] text-white rounded-xl font-medium hover:bg-[#36333F] transition disabled:opacity-50">{isSaving ? 'กำลังบันทึก...' : 'บันทึกข้อมูล'}</button>
               </div>
             </form>
           </div>
@@ -366,5 +301,4 @@ function ManageBooks() {
     </div>
   );
 }
-
 export default ManageBooks;
