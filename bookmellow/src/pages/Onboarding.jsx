@@ -34,7 +34,6 @@ function Onboarding() {
   // โหลดความสนใจเดิมของผู้ใช้ (ถ้ามี)
   useEffect(() => {
     const loadExistingInterests = async () => {
-      // 1. ดึงจาก localStorage ก่อนเพื่อให้แสดงผลทันที
       try {
         const localSaved = localStorage.getItem('user_interests');
         if (localSaved) {
@@ -45,7 +44,6 @@ function Onboarding() {
         console.error(e);
       }
 
-      // 2. หากล็อกอินอยู่ ให้ลองดึงข้อมูลล่าสุดจาก Backend
       if (isLoggedIn) {
         try {
           const res = await apiRequest('/api/user/interests');
@@ -82,11 +80,8 @@ function Onboarding() {
 
     try {
       setIsSaving(true);
-
-      // บันทึกลง localStorage ไว้ให้หน้าหนังสือแนะนำนำไปกรองได้ทันที
       localStorage.setItem('user_interests', JSON.stringify(selectedInterests));
 
-      // ส่งข้อมูลไปบันทึกที่ Backend (รองรับหลายรูปแบบ endpoint)
       if (isLoggedIn) {
         const endpoints = [
           { url: '/api/user/interests', method: 'POST' },
@@ -183,9 +178,9 @@ function Onboarding() {
           </button>
         </div>
 
-        {/* กล่องแจ้งเตือนเมื่อบันทึกความสนใจเรียบร้อยแล้ว (ตามภาพที่ 2) */}
+        {/* กล่องแจ้งเตือนเมื่อบันทึกความสนใจเรียบร้อยแล้ว */}
         {isSavedSuccess && (
-          <div className="mt-10 max-w-lg mx-auto bg-white border border-[#EBE4D8] rounded-3xl p-8 sm:p-10 text-center shadow-sm space-y-4 animate-fade-in">
+          <div className="mt-10 max-w-lg mx-auto bg-white border border-[#EBE4D8] rounded-3xl p-8 sm:p-10 text-center shadow-sm space-y-4">
             <div className="text-2xl font-bold text-[#3B6E52]">✓</div>
             <h3 className="text-lg sm:text-xl font-bold text-[#3B261C]">
               บันทึกความสนใจเรียบร้อยแล้ว!
@@ -196,7 +191,7 @@ function Onboarding() {
             <div className="pt-2">
               <button
                 type="button"
-                onClick={() => navigate('/explore')}
+                onClick={() => navigate('/recommendations')}
                 className="px-8 py-3 bg-[#4A2B1D] hover:bg-[#361E13] text-white rounded-full text-xs sm:text-sm font-semibold shadow-sm transition"
               >
                 ดูหนังสือแนะนำของฉัน
@@ -210,4 +205,5 @@ function Onboarding() {
     </div>
   );
 }
+
 export default Onboarding;

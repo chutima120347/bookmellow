@@ -7,6 +7,7 @@ import Explore from './pages/Explore';
 import BookDetail from './pages/BookDetail';
 import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
+import Recommendations from './pages/Recommendations';
 import Auth from './pages/Auth';
 import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/AdminDashboard';
@@ -24,7 +25,7 @@ function Forbidden403() {
           ไม่มีสิทธิ์เข้าถึง
         </h1>
         <p className="text-xs sm:text-sm text-[#7A756E] max-w-md">
-          ขออภัย หน้านี้สงวนสิทธิ์ไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น
+          ขออภัย หน้านี้สงวนสิทธิ์ไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น คุณไม่มีสิทธิ์เข้าถึงเนื้อหาในส่วนนี้
         </p>
         <div className="pt-2">
           <button
@@ -62,6 +63,7 @@ function App() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/interests" element={<Onboarding />} />
+          <Route path="/recommendations" element={<Recommendations />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/favorites" element={<Favorites />} />
 

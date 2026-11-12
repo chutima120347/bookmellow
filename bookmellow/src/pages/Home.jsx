@@ -123,13 +123,13 @@ function Home() {
                 onClick={() => navigate('/explore')}
                 className="bg-[#8C533A] hover:bg-[#4A2B1D] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2"
               >
-                เริ่มค้นหาหนังสือ ➔
+                เริ่มค้นหาหนังสือ
               </button>
               <button
                 onClick={() => navigate('/interests')}
                 className="bg-[#FDFBF7] hover:bg-[#E8DCC4] text-[#4A2B1D] px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2"
               >
-                ✨ เลือกตามความสนใจ
+                เลือกตามความสนใจ
               </button>
             </div>
           </div>

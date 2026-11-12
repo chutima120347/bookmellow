@@ -58,6 +58,14 @@ function Navbar() {
             >
               ค้นหาหนังสือ
             </button>
+            <button
+              onClick={() => navigate('/recommendations')}
+              className={`transition hover:text-[#E8DCC4] ${
+                location.pathname === '/recommendations' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
+              }`}
+            >
+              หนังสือแนะนำ
+            </button>
             {isLoggedIn && (
               <button
                 onClick={() => navigate('/favorites')}
@@ -121,11 +129,20 @@ function Navbar() {
                   <button
                     onClick={() => {
                       setIsDropdownOpen(false);
-                      navigate('/favorites');
+                      navigate('/interests');
                     }}
                     className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
                   >
-                    <span>💖</span> รายการโปรด
+                    <span>✨</span> เลือกความสนใจ
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate('/favorites');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
+                  >รายการโปรด
                   </button>
 
                   {user?.isAdmin && (
@@ -135,27 +152,15 @@ function Navbar() {
                         navigate('/admin');
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
-                    >
-                      <span>👑</span> แดชบอร์ด
+                    >แดชบอร์ด
                     </button>
                   )}
-
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      navigate('/explore');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2 md:hidden"
-                  >
-                    <span>🔍</span> ค้นหาหนังสือ
-                  </button>
 
                   <div className="border-t border-[#F4EFE6] mt-1 pt-1">
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-rose-600 hover:bg-rose-50 font-semibold transition flex items-center gap-2"
-                    >
-                      <span>🚪</span> ออกจากระบบ
+                    >ออกจากระบบ
                     </button>
                   </div>
                 </div>
