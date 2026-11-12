@@ -1,8 +1,6 @@
 // 1. กำหนดค่า API Base URL (รองรับ Create React App / react-scripts บน Vercel)
-export const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL ||
-  process.env.REACT_APP_API_URL ||
-  'https://bookmellow-backend.onrender.com';
+// ชี้ตรงไปที่ Backend บน Render ของคุณเลย (ไม่มี / ปิดท้าย)
+export const API_BASE_URL = 'https://bookmellow-backend.onrender.com';
 
 /**
  * ฟังก์ชันกลางสำหรับเรียกใช้งาน API
