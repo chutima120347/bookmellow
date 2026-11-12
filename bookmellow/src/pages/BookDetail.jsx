@@ -129,9 +129,7 @@ function BookDetail() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center text-xs text-gray-400">
-        กำลังโหลดข้อมูลหนังสือ...
-      </div>
+      <div className="min-h-screen bg-[#FDFBF7] flex items-center justify-center text-xs text-gray-400">กำลังโหลดข้อมูลหนังสือ...</div>
     );
   }
 
@@ -141,10 +139,7 @@ function BookDetail() {
         <p className="text-sm font-bold">ไม่พบข้อมูลหนังสือเล่มนี้</p>
         <button
           onClick={() => navigate('/explore')}
-          className="px-5 py-2 bg-[#8C533A] text-white rounded-full text-xs font-semibold hover:bg-[#633A27] transition"
-        >
-          กลับไปค้นหาหนังสือ
-        </button>
+          className="px-5 py-2 bg-[#8C533A] text-white rounded-full text-xs font-semibold hover:bg-[#633A27] transition">กลับไปค้นหาหนังสือ</button>
       </div>
     );
   }
@@ -201,12 +196,8 @@ function BookDetail() {
 
           <div className="md:col-span-2 space-y-5">
             <div>
-              <span className="text-xs px-3 py-1 bg-[#F4EFE6] text-[#8C533A] rounded-full border border-[#E8DCC4] font-semibold">
-                หมวดหมู่: {categoryText}
-              </span>
-              <h1 className="text-2xl sm:text-3xl font-bold text-[#4A2B1D] mt-3 leading-snug">
-                {book.title}
-              </h1>
+              <span className="text-xs px-3 py-1 bg-[#F4EFE6] text-[#8C533A] rounded-full border border-[#E8DCC4] font-semibold">หมวดหมู่: {categoryText}</span>
+              <h1 className="text-2xl sm:text-3xl font-bold text-[#4A2B1D] mt-3 leading-snug">{book.title}</h1>
               {book.subtitle && (
                 <p className="text-xs sm:text-sm text-gray-500 mt-1">{book.subtitle}</p>
               )}
@@ -232,7 +223,6 @@ function BookDetail() {
           </div>
         </div>
 
-        {/* Tabs */}
         <section className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DCC4] shadow-sm space-y-6">
           <div className="flex border-b border-[#E8DCC4] gap-6 text-xs sm:text-sm font-bold">
             <button
@@ -241,30 +231,21 @@ function BookDetail() {
                 activeTab === 'description'
                   ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
                   : 'text-gray-400 hover:text-[#4A2B1D]'
-              }`}
-            >
-              เรื่องย่อ
-            </button>
+              }`}>เรื่องย่อ</button>
             <button
               onClick={() => setActiveTab('details')}
               className={`pb-3 transition relative ${
                 activeTab === 'details'
                   ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
                   : 'text-gray-400 hover:text-[#4A2B1D]'
-              }`}
-            >
-              ข้อมูลหนังสือ
-            </button>
+              }`}>ข้อมูลหนังสือ</button>
             <button
               onClick={() => setActiveTab('reviews')}
               className={`pb-3 transition relative ${
                 activeTab === 'reviews'
                   ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
                   : 'text-gray-400 hover:text-[#4A2B1D]'
-              }`}
-            >
-              รีวิวจากผู้อ่าน ({reviewsList.length})
-            </button>
+              }`}>รีวิวจากผู้อ่าน ({reviewsList.length})</button>
           </div>
 
           {activeTab === 'description' && (
@@ -312,16 +293,12 @@ function BookDetail() {
                       required
                       className="w-full p-3 bg-white border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
                     ></textarea>
-                    <button type="submit" className="px-5 py-2 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-full text-xs font-semibold shadow-sm transition">
-                      ส่งรีวิว
-                    </button>
+                    <button type="submit" className="px-5 py-2 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-full text-xs font-semibold shadow-sm transition">ส่งรีวิว</button>
                   </form>
                 ) : (
                   <div className="text-center py-4 space-y-2">
                     <p className="text-xs text-gray-600">กรุณาเข้าสู่ระบบก่อนเขียนรีวิวและให้คะแนนหนังสือ</p>
-                    <button onClick={() => setShowAuthModal(true)} className="px-4 py-1.5 bg-[#8C533A] text-[#FDFBF7] rounded-full text-xs font-semibold hover:bg-[#633A27] transition">
-                      เข้าสู่ระบบเพื่อเขียนรีวิว
-                    </button>
+                    <button onClick={() => setShowAuthModal(true)} className="px-4 py-1.5 bg-[#8C533A] text-[#FDFBF7] rounded-full text-xs font-semibold hover:bg-[#633A27] transition">เข้าสู่ระบบเพื่อเขียนรีวิว</button>
                   </div>
                 )}
               </div>
@@ -366,12 +343,8 @@ function BookDetail() {
             <h3 className="font-bold text-base text-[#4A2B1D]">ต้องเข้าสู่ระบบก่อนใช้งาน</h3>
             <p className="text-xs text-gray-500">กรุณาเข้าสู่ระบบเพื่อบันทึกรายการโปรดและเขียนรีวิวหนังสือเล่มนี้</p>
             <div className="flex gap-2 pt-2">
-              <button onClick={() => setShowAuthModal(false)} className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold hover:bg-gray-200 transition">
-                ยกเลิก
-              </button>
-              <button onClick={() => { setShowAuthModal(false); navigate('/auth'); }} className="flex-1 py-2 bg-[#8C533A] text-white rounded-full text-xs font-semibold hover:bg-[#633A27] transition">
-                ไปหน้าเข้าสู่ระบบ
-              </button>
+              <button onClick={() => setShowAuthModal(false)} className="flex-1 py-2 bg-gray-100 text-gray-600 rounded-full text-xs font-semibold hover:bg-gray-200 transition">ยกเลิก</button>
+              <button onClick={() => { setShowAuthModal(false); navigate('/auth'); }} className="flex-1 py-2 bg-[#8C533A] text-white rounded-full text-xs font-semibold hover:bg-[#633A27] transition">ไปหน้าเข้าสู่ระบบ</button>
             </div>
           </div>
         </div>

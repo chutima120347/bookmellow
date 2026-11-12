@@ -52,12 +52,8 @@ function Favorites() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">
-            💖 <span>รายการโปรดของฉัน (My Favorites)</span>
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            หนังสือที่คุณบันทึกไว้ในดวงใจ ทั้งหมด {favoriteBooks.length} เล่ม
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">💖 <span>รายการโปรดของฉัน</span></h1>
+          <p className="text-xs sm:text-sm text-slate-500 mt-1">หนังสือที่คุณบันทึกไว้ในดวงใจ ทั้งหมด {favoriteBooks.length} เล่ม</p>
         </div>
 
         {isLoading ? (
@@ -73,8 +69,7 @@ function Favorites() {
                 <div
                   key={book.id}
                   onClick={() => navigate(`/book/${book.id}`)}
-                  className="group bg-white rounded-3xl p-3 sm:p-4 border border-pink-100 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
-                >
+                  className="group bg-white rounded-3xl p-3 sm:p-4 border border-pink-100 shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between">
                   <div className="space-y-3">
                     <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-[#FAF7F0]">
                       <BookCover src={book.cover_url || book.cover} title={book.title} />
@@ -85,10 +80,7 @@ function Favorites() {
                       <button
                         onClick={(e) => handleRemoveFavorite(e, book.id)}
                         title="ลบออกจากรายการโปรด"
-                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-pink-500 shadow-sm hover:bg-pink-50 hover:scale-110 transition"
-                      >
-                        💖
-                      </button>
+                        className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-pink-500 shadow-sm hover:bg-pink-50 hover:scale-110 transition">💖</button>
                     </div>
 
                     <div>
@@ -101,9 +93,7 @@ function Favorites() {
                     <span className="text-[10px] text-pink-500 bg-pink-50 px-2 py-0.5 rounded-full truncate max-w-[110px]">
                       {book.reason || book.description || 'หนังสือเล่มโปรด'}
                     </span>
-                    <span className="text-xs font-semibold text-pink-500 group-hover:underline">
-                      อ่านเลย &gt;
-                    </span>
+                    <span className="text-xs font-semibold text-pink-500 group-hover:underline">อ่านเลย &gt;</span>
                   </div>
                 </div>
               );
@@ -116,10 +106,7 @@ function Favorites() {
             <p className="text-xs text-slate-400">กดไอคอนหัวใจ 💖 บนหนังสือที่ชอบเพื่อเก็บไว้ที่นี่ได้เลยน้า</p>
             <button
               onClick={() => navigate('/explore')}
-              className="px-6 py-2.5 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white text-xs font-semibold rounded-full shadow-sm transition"
-            >
-              ไปเลือกดูหนังสือกันเลย
-            </button>
+              className="px-6 py-2.5 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white text-xs font-semibold rounded-full shadow-sm transition">ไปเลือกดูหนังสือกันเลย</button>
           </div>
         )}
       </main>
