@@ -131,7 +131,7 @@ function Recommendations() {
                       </h2>
 
                       <p className="text-xs text-[#7A6A60] line-clamp-1">
-                        ผู้เขียน: {book.author || 'ไม่ระบุผู้เขียน'}
+                        ผู้แต่ง: {book.author || 'ไม่ระบุผู้แต่ง'}
                       </p>
 
                       <p className="text-xs text-[#5C4D44] leading-relaxed line-clamp-2 min-h-[2.5rem]">

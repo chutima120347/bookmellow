@@ -136,7 +136,7 @@ function AdminDashboard() {
                           <div className="min-w-0 flex-1">
                             <Link to={`/book/${b.id}`} className="block truncate text-sm font-medium text-[#1E1C1A] hover:text-[#8C533A]">{b.title}</Link>
                             {b.author && (
-                              <p className="truncate text-xs text-[#7A756E]">ผู้เขียน: {b.author}</p>
+                              <p className="truncate text-xs text-[#7A756E]">ผู้แต่ง: {b.author}</p>
                             )}
                           </div>
                           <span className="text-sm text-[#4A2B1D]">⭐ {rating > 0 ? rating.toFixed(1) : ' '}{' '}
