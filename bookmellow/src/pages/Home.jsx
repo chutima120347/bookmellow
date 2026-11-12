@@ -27,7 +27,7 @@ const categoryOptions = [
 
 function Home() {
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   const [books, setBooks] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -112,6 +112,7 @@ function Home() {
       <Navbar />
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
+
         {/* 1. Hero Banner */}
         <section className="relative overflow-hidden bg-[#633A27] text-[#FDFBF7] rounded-3xl p-8 sm:p-12 shadow-md">
           <div className="relative z-10 max-w-2xl space-y-4">
