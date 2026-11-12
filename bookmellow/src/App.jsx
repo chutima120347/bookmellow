@@ -12,6 +12,7 @@ import Auth from './pages/Auth';
 import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/AdminDashboard';
 import ManageBooks from './pages/ManageBooks';
+import AdminMembers from './pages/AdminMembers';
 
 function Forbidden403() {
   const navigate = useNavigate();
@@ -81,6 +82,14 @@ function App() {
               <AdminRoute>
                 <ManageBooks />
               </AdminRoute>
+            }
+          />
+          <Route
+            path="/admin/members"
+            element={
+              <AdminRoute>
+                <AdminMembers />
+          </AdminRoute>
             }
           />
         </Routes>
