@@ -15,23 +15,11 @@ function StatCard({ label, value, to }) {
     </>
   );
   const cls = 'rounded-2xl border border-[#E6E0D6] bg-white p-5 transition';
-  return to ? (
-    <Link to={to} className={`${cls} block hover:border-[#8C533A] shadow-sm`}>
-      {body}
-    </Link>
-  ) : (
-    <div className={cls}>{body}</div>
-  );
+  return to ? <Link to={to} className={`${cls} block hover:border-[#8C533A] shadow-sm`}>{body}</Link> : <div className={cls}>{body}</div>;
 }
 
-const dateTH = (iso) => {
-  if (!iso) return '-';
-  return new Date(iso).toLocaleDateString('th-TH', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-  });
-};
+const dateTH = (iso) => new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+
 
 function AdminDashboard() {
   const { user } = useAuth();
@@ -169,8 +157,7 @@ function AdminDashboard() {
                             <BookCover src={b.cover_url || b.cover} title={b.title} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <Link
-                              to={`/book/${b.id}`}
+                            <Link to={`/book/${b.id}`}
                               className="block truncate text-sm font-medium text-[#1E1C1A] hover:text-[#8C533A]"
                             >
                               {b.title}
@@ -192,38 +179,23 @@ function AdminDashboard() {
                 )}
               </section>
 
-              <section className="rounded-2xl border border-[#E6E0D6] bg-white p-5">
-                <h2 className="font-semibold text-[#1E1C1A]">สมาชิกใหม่ล่าสุด</h2>
-                <ul className="mt-3 divide-y divide-[#F3EFE8]">
-                  {stats.newestMembers.map((m) => {
-                    const isMemberAdmin =
-                      String(m.role || '').toLowerCase() === 'admin' || m.isAdmin === true;
-                    return (
-                      <li key={m.id} className="flex items-center justify-between py-2.5 text-sm">
-                        <div className="min-w-0">
-                          <p className="truncate font-medium text-[#1E1C1A]">
-                            {m.displayName || m.username || 'นักอ่าน'}
-                          </p>
-                          <p className="truncate text-xs text-[#7A756E]">{m.email}</p>
-                        </div>
-                        <div className="text-right text-xs text-[#8C7B70]">
-                          {isMemberAdmin && (
-                            <span className="mr-2 rounded-full bg-[#4A2B1D] px-2 py-0.5 text-[#FDFBF7]">
-                              admin
-                            </span>
-                          )}
-                          {dateTH(m.createdAt || m.created_at)}
-                        </div>
-                      </li>
-                    );
-                  })}
+              <section className="rounded-xl border border-emerald-100 bg-white p-4">
+                <h2 className="font-semibold text-slate-900">สมาชิกใหม่ล่าสุด</h2>
+                <ul className="mt-3 divide-y divide-slate-100">
+                  {stats.newestMembers.map(m => (
+                    <li key={m.id} className="flex items-center justify-between py-2 text-sm">
+                      <div className="min-w-0">
+                        <p className="truncate font-medium text-slate-900">{m.displayName}</p>
+                        <p className="truncate text-xs text-slate-500">{m.email}</p>
+                      </div>
+                      <div className="text-right text-xs text-slate-400">
+                        {m.role === 'admin' && <span className="mr-2 rounded-full bg-emerald-100 px-2 py-0.5 text-emerald-700">admin</span>}
+                        {dateTH(m.createdAt)}
+                      </div>
+                    </li>
+                  ))}
                 </ul>
-                <Link
-                  to="/admin/members"
-                  className="mt-4 inline-block text-sm font-semibold text-[#8C533A] hover:underline"
-                >
-                  ดูสมาชิกทั้งหมด
-                </Link>
+                <Link to="/admin/members" className="mt-4 inline-block text-sm font-semibold text-[#8C533A] hover:underline">ดูสมาชิกทั้งหมด</Link>
               </section>
             </div>
           </div>
