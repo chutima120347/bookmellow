@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useNavigate } from 'react-router-dom';
-import { booksData } from '../data/data';
+import { apiRequest } from '../services/api';
 import BookCover from '../components/BookCover';
 
 const categoryOptions = [
@@ -25,14 +25,35 @@ const categoryOptions = [
 ];
 
 function Home() {
+  const [books, setBooks] = useState([]); // เก็บข้อมูลหนังสือจาก Backend
+  const [loading, setLoading] = useState(true); // สถานะกำลังโหลด
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
 
-  const safeBooksData = Array.isArray(booksData) ? booksData : [];
+  // ดึงข้อมูลหนังสือจาก Backend ทันทีที่เปิดหน้า Home
+  useEffect(() => {
+    const fetchBooks = async () => {
+      try {
+        setLoading(true);
+        // ⚠️ เช็ก endpoint ของ Backend คุณว่าเป็น '/api/books' หรือ '/books'
+        const data = await apiRequest('/api/books'); 
+        
+        // รองรับทั้งกรณีที่ Backend ส่งกลับมาเป็น Array ตรงๆ หรือเป็น Object เช่น { books: [...] }
+        const booksList = Array.isArray(data) ? data : (data.books || data.data || []);
+        setBooks(booksList);
+      } catch (error) {
+        console.error('ดึงข้อมูลหนังสือไม่สำเร็จ:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBooks();
+  }, []);
 
   // กรองหนังสือตามหมวดหมู่
-  const filteredBooks = safeBooksData.filter((book) => {
+  const filteredBooks = books.filter((book) => {
     const bookCategories = Array.isArray(book.categories) 
       ? book.categories 
       : [book.category || ''];
@@ -40,8 +61,8 @@ function Home() {
     return selectedCategory === 'all' || bookCategories.includes(selectedCategory);
   });
 
-  // รายการหนังสือยอดนิยม (ดึง 5 เล่มแรกหรือจากสัญลักษณ์ popular)
-  const popularBooks = safeBooksData.slice(0, 5);
+  // รายการหนังสือยอดนิยม
+  const popularBooks = books.slice(0, 5);
 
   const toggleFavorite = (e, id) => {
     e.stopPropagation();
@@ -58,7 +79,7 @@ function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
         
-        {/* 1. Hero Banner สไตล์อบอุ่นแบบภาพแรก */}
+        {/* 1. Hero Banner */}
         <section className="relative overflow-hidden bg-[#633A27] text-[#FDFBF7] rounded-3xl p-8 sm:p-12 shadow-md">
           <div className="relative z-10 max-w-2xl space-y-4">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[#FDFBF7]">
@@ -77,7 +98,7 @@ function Home() {
           </div>
         </section>
 
-        {/* 2. หมวดหมู่หนังสือ (ใช้แบบแท็บสไลด์เดิม ไม่เพิ่มไอคอนกล่อง) */}
+        {/* 2. หมวดหมู่หนังสือ */}
         <section id="categories-section" className="space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -103,7 +124,7 @@ function Home() {
           </div>
         </section>
 
-        {/* 3. หนังสือแนะนำสำหรับคุณ (Books Grid) */}
+        {/* 3. หนังสือแนะนำสำหรับคุณ */}
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
@@ -114,61 +135,67 @@ function Home() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-            {filteredBooks.length > 0 ? (
-              filteredBooks.map((book) => {
-                const isFav = favorites.includes(book.id);
-                const firstCategory = Array.isArray(book.categories) && book.categories.length > 0
-                  ? book.categories[0]
-                  : (book.category || 'ทั่วไป');
+          {loading ? (
+            <div className="text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
+              <p className="text-[#8C533A] text-sm animate-pulse">กำลังโหลดข้อมูลหนังสือจากเซิร์ฟเวอร์...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+              {filteredBooks.length > 0 ? (
+                filteredBooks.map((book) => {
+                  const isFav = favorites.includes(book.id);
+                  const firstCategory = Array.isArray(book.categories) && book.categories.length > 0
+                    ? book.categories[0]
+                    : (book.category || 'ทั่วไป');
 
-                return (
-                  <div
-                    key={book.id}
-                    onClick={() => navigate(`/book/${book.id}`)}
-                    className="group bg-white rounded-2xl p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between">
-                    <div className="space-y-3">
-                      <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
-                        <BookCover src={book.cover_url || book.cover} title={book.title} />
+                  return (
+                    <div
+                      key={book.id}
+                      onClick={() => navigate(`/book/${book.id}`)}
+                      className="group bg-white rounded-2xl p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between">
+                      <div className="space-y-3">
+                        <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
+                          <BookCover src={book.cover_url || book.cover} title={book.title} />
 
-                        <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-[#8C533A] border-[#E8DCC4]">
-                          {firstCategory}
+                          <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-[#8C533A] border-[#E8DCC4]">
+                            {firstCategory}
+                          </span>
+
+                          <button
+                            onClick={(e) => toggleFavorite(e, book.id)}
+                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-rose-500 shadow-sm hover:scale-110 transition"
+                          >
+                            {isFav ? '💖' : '🤍'}
+                          </button>
+                        </div>
+
+                        <div>
+                          <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1">{book.title}</h3>
+                          <p className="text-xs text-gray-500 truncate">ผู้แต่ง: {book.author}</p>
+                        </div>
+                      </div>
+
+                      <div className="pt-3 border-t border-[#F4EFE6] mt-3 flex items-center justify-between">
+                        <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2 py-0.5 rounded-full truncate max-w-[110px]">
+                          {book.reason || book.description || 'แนะนำสำหรับคุณ'}
                         </span>
-
-                        <button
-                          onClick={(e) => toggleFavorite(e, book.id)}
-                          className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-rose-500 shadow-sm hover:scale-110 transition"
-                        >
-                          {isFav ? '💖' : '🤍'}
-                        </button>
-                      </div>
-
-                      <div>
-                        <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1">{book.title}</h3>
-                        <p className="text-xs text-gray-500 truncate">ผู้แต่ง: {book.author}</p>
+                        <span className="text-xs font-semibold text-[#8C533A] group-hover:underline flex-shrink-0">
+                          รายละเอียด &gt;
+                        </span>
                       </div>
                     </div>
-
-                    <div className="pt-3 border-t border-[#F4EFE6] mt-3 flex items-center justify-between">
-                      <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2 py-0.5 rounded-full truncate max-w-[110px]">
-                        {book.reason || book.description || 'แนะนำสำหรับคุณ'}
-                      </span>
-                      <span className="text-xs font-semibold text-[#8C533A] group-hover:underline flex-shrink-0">
-                        รายละเอียด &gt;
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
-                <p className="text-gray-400 text-sm">ไม่พบหนังสือในหมวดหมู่นี้</p>
-              </div>
-            )}
-          </div>
+                  );
+                })
+              ) : (
+                <div className="col-span-full text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
+                  <p className="text-gray-400 text-sm">ไม่พบหนังสือในหมวดหมู่นี้</p>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
-        {/* 4. แถบหนังสือยอดนิยม (Popular Books Strip เพิ่มตามแบบแรก) */}
+        {/* 4. แถบหนังสือยอดนิยม */}
         {popularBooks.length > 0 && (
           <section className="bg-white p-6 rounded-3xl border border-[#E8DCC4] shadow-sm space-y-4">
             <div className="flex items-center justify-between">

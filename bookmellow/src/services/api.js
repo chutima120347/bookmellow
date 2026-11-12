@@ -1,5 +1,8 @@
-// 1. กำหนดค่า API Base URL (ดึงจาก Environment Variable หรือใช้ค่า Default บน Render)
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://bookmellow-backend.onrender.com';
+// 1. กำหนดค่า API Base URL (รองรับ Create React App / react-scripts บน Vercel)
+export const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL ||
+  process.env.REACT_APP_API_URL ||
+  'https://bookmellow-backend.onrender.com';
 
 /**
  * ฟังก์ชันกลางสำหรับเรียกใช้งาน API
