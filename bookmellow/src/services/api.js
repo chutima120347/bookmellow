@@ -38,3 +38,31 @@ export async function apiRequest(endpoint, options = {}) {
 
   return data;
 }
+
+// ดึงรายชื่อสมาชิกทั้งหมดสำหรับ Admin
+export async function getAdminMembers() {
+  const res = await apiRequest('/api/admin/members');
+  return Array.isArray(res) ? res : (res?.members || res?.data || []);
+}
+
+// อัปเดตบทบาทสมาชิก (admin / member)
+export async function setMemberRole(memberId, role) {
+  const endpoints = [
+    { url: `/api/admin/members/${memberId}/role`, method: 'PATCH' },
+    { url: `/api/admin/members/${memberId}`, method: 'PUT' },
+  ];
+
+  let lastErr = null;
+  for (const ep of endpoints) {
+    try {
+      const res = await apiRequest(ep.url, {
+        method: ep.method,
+        body: JSON.stringify({ role }),
+      });
+      return res?.member || res?.data || { id: memberId, role };
+    } catch (err) {
+      lastErr = err;
+    }
+  }
+  throw lastErr || new Error('ไม่สามารถเปลี่ยนบทบาทสมาชิกได้');
+}
