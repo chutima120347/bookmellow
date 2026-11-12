@@ -10,9 +10,9 @@ import Onboarding from './pages/Onboarding';
 import Recommendations from './pages/Recommendations';
 import Auth from './pages/Auth';
 import Favorites from './pages/Favorites';
-import AdminDashboard from './pages/AdminDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageBooks from './pages/ManageBooks';
-import AdminMembers from './pages/AdminMembers';
+import AdminMembers from './pages/admin/AdminMembers';
 
 function Forbidden403() {
   const navigate = useNavigate();

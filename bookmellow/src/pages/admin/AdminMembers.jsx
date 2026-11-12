@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import { useAuth } from '../auth/AuthContext';
-import { apiRequest } from '../services/api';
+import Navbar from '../../components/Navbar';
+import Footer from '../../components/Footer';
+import { useAuth } from '../../auth/AuthContext';
+import { apiRequest } from '../../services/api';
 
 const dateTH = (iso) => {
   if (!iso) return '-';
