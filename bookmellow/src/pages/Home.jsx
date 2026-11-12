@@ -27,14 +27,14 @@ const categoryOptions = [
 
 function Home() {
   const navigate = useNavigate();
-  const { user, isLoggedIn } = useAuth();
+  const { isLoggedIn } = useAuth();
 
   const [books, setBooks] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [loading, setLoading] = useState(true);
 
-  // State สำหรับสถิติ Admin Dashboard (แสดงเฉพาะ Admin)
+  // State สำหรับสถิติ Admin Dashboard
   const [adminStats, setAdminStats] = useState({ books: 0, members: 0, admins: 0 });
   const [isLoadingStats, setIsLoadingStats] = useState(false);
 
@@ -76,10 +76,8 @@ function Home() {
     fetchFavorites();
   }, [isLoggedIn]);
 
-  // 3. ดึงสถิติ Admin Dashboard (เฉพาะผู้ดูแลระบบ)
+  // 3. ดึงสถิติ Admin Dashboard มาแสดงทันที
   useEffect(() => {
-    if (!isLoggedIn || !user?.isAdmin) return;
-
     async function fetchAdminStats() {
       try {
         setIsLoadingStats(true);
@@ -115,7 +113,7 @@ function Home() {
     }
 
     fetchAdminStats();
-  }, [isLoggedIn, user]);
+  }, []);
 
   // เพิ่ม / ลบ รายการโปรด
   const toggleFavorite = async (e, bookId) => {
@@ -158,52 +156,50 @@ function Home() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
-        {/* ส่วน Admin Dashboard (แสดงเฉพาะผู้ดูแลระบบเท่านั้น) */}
-        {isLoggedIn && user?.isAdmin && (
-          <section className="bg-[#FAF7F2] border border-[#E6E0D6] rounded-3xl p-6 sm:p-10 space-y-8 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1">
-                <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1E1C1A]">
-                  Admin Dashboard
-                </h1>
-                <p className="text-sm text-[#7A756E]">
-                  ภาพรวมและจัดการระบบ BookMellow
-                </p>
-              </div>
-
-              <button
-                onClick={() => navigate('/admin/manage-books')}
-                className="px-6 py-3 bg-[#232129] hover:bg-[#36333F] text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm transition inline-flex items-center justify-center gap-2 self-start sm:self-auto"
-              >
-                <span>+</span>
-                <span>จัดการหนังสือ</span>
-              </button>
+        {/* ส่วน Admin Dashboard แสดงด้านบนสุดของหน้า Home */}
+        <section className="bg-[#FAF7F2] border border-[#E6E0D6] rounded-3xl p-6 sm:p-10 space-y-8 shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-[#1E1C1A]">
+                Admin Dashboard
+              </h1>
+              <p className="text-sm text-[#7A756E]">
+                ภาพรวมและจัดการระบบ BookMellow
+              </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="bg-[#F3EFE8]/90 border border-[#E6E0D6] rounded-2xl p-6 sm:p-7 space-y-3">
-                <p className="text-xs font-medium text-[#7A756E]">หนังสือทั้งหมด</p>
-                <p className="text-3xl sm:text-4xl font-bold text-[#1E1C1A]">
-                  {isLoadingStats ? '...' : adminStats.books}
-                </p>
-              </div>
+            <button
+              onClick={() => navigate('/admin/manage-books')}
+              className="px-6 py-3 bg-[#232129] hover:bg-[#36333F] text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm transition inline-flex items-center justify-center gap-2 self-start sm:self-auto"
+            >
+              <span>+</span>
+              <span>จัดการหนังสือ</span>
+            </button>
+          </div>
 
-              <div className="bg-[#F3EFE8]/90 border border-[#E6E0D6] rounded-2xl p-6 sm:p-7 space-y-3">
-                <p className="text-xs font-medium text-[#7A756E]">สมาชิกทั้งหมด</p>
-                <p className="text-3xl sm:text-4xl font-bold text-[#1E1C1A]">
-                  {isLoadingStats ? '...' : adminStats.members}
-                </p>
-              </div>
-
-              <div className="bg-[#F3EFE8]/90 border border-[#E6E0D6] rounded-2xl p-6 sm:p-7 space-y-3">
-                <p className="text-xs font-medium text-[#7A756E]">ผู้ดูแลระบบ</p>
-                <p className="text-3xl sm:text-4xl font-bold text-[#1E1C1A]">
-                  {isLoadingStats ? '...' : adminStats.admins}
-                </p>
-              </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <div className="bg-[#F3EFE8]/90 border border-[#E6E0D6] rounded-2xl p-6 sm:p-7 space-y-3">
+              <p className="text-xs font-medium text-[#7A756E]">หนังสือทั้งหมด</p>
+              <p className="text-3xl sm:text-4xl font-bold text-[#1E1C1A]">
+                {isLoadingStats ? '...' : adminStats.books}
+              </p>
             </div>
-          </section>
-        )}
+
+            <div className="bg-[#F3EFE8]/90 border border-[#E6E0D6] rounded-2xl p-6 sm:p-7 space-y-3">
+              <p className="text-xs font-medium text-[#7A756E]">สมาชิกทั้งหมด</p>
+              <p className="text-3xl sm:text-4xl font-bold text-[#1E1C1A]">
+                {isLoadingStats ? '...' : adminStats.members}
+              </p>
+            </div>
+
+            <div className="bg-[#F3EFE8]/90 border border-[#E6E0D6] rounded-2xl p-6 sm:p-7 space-y-3">
+              <p className="text-xs font-medium text-[#7A756E]">ผู้ดูแลระบบ</p>
+              <p className="text-3xl sm:text-4xl font-bold text-[#1E1C1A]">
+                {isLoadingStats ? '...' : adminStats.admins}
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* 1. Hero Banner */}
         <section className="relative overflow-hidden bg-[#633A27] text-[#FDFBF7] rounded-3xl p-8 sm:p-12 shadow-md">
