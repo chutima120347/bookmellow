@@ -30,7 +30,13 @@ export async function apiRequest(endpoint, options = {}) {
     throw new Error('Session expired. Please login again.');
   }
 
-  const data = await response.json();
+  const text = await response.text();
+  let data = {};
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { message: text };
+  }
 
   if (!response.ok) {
     throw new Error(data.message || data.error || 'Something went wrong');
@@ -39,30 +45,63 @@ export async function apiRequest(endpoint, options = {}) {
   return data;
 }
 
-// ดึงรายชื่อสมาชิกทั้งหมดสำหรับ Admin
+// 2. ดึงสถิติรวมสำหรับหน้า Admin Dashboard
+export async function getAdminStats() {
+  const [booksRes, membersRes] = await Promise.all([
+    apiRequest('/api/books'),
+    apiRequest('/api/admin/members'),
+  ]);
+
+  const books = Array.isArray(booksRes) ? booksRes : (booksRes?.books || booksRes?.data || []);
+  const members = Array.isArray(membersRes) ? membersRes : (membersRes?.members || membersRes?.data || []);
+
+  const admins = members.filter(
+    (m) => String(m.role || '').toLowerCase() === 'admin' || m.isAdmin === true
+  );
+
+  const topRated = [...books]
+    .sort((a, b) => Number(b.rating || b.average_rating || 0) - Number(a.rating || a.average_rating || 0))
+    .slice(0, 5);
+
+  const newestMembers = [...members]
+    .sort((a, b) => new Date(b.createdAt || b.created_at || 0) - new Date(a.createdAt || a.created_at || 0))
+    .slice(0, 5);
+
+  return {
+    books: books.length,
+    members: members.length - admins.length,
+    admins: admins.length,
+    topRated,
+    newestMembers,
+  };
+}
+
+// 3. ดึงรายชื่อสมาชิกทั้งหมดสำหรับ Admin
 export async function getAdminMembers() {
   const res = await apiRequest('/api/admin/members');
   return Array.isArray(res) ? res : (res?.members || res?.data || []);
 }
 
-// อัปเดตบทบาทสมาชิก (admin / member)
+// 4. อัปเดตบทบาทสมาชิก (admin / member)
 export async function setMemberRole(memberId, role) {
   const endpoints = [
     { url: `/api/admin/members/${memberId}/role`, method: 'PATCH' },
+    { url: `/api/admin/members/${memberId}/role`, method: 'PUT' },
+    { url: `/api/admin/members/${memberId}/role`, method: 'POST' },
+    { url: `/api/admin/members/${memberId}`, method: 'PATCH' },
     { url: `/api/admin/members/${memberId}`, method: 'PUT' },
   ];
 
-  let lastErr = null;
   for (const ep of endpoints) {
     try {
       const res = await apiRequest(ep.url, {
         method: ep.method,
-        body: JSON.stringify({ role }),
+        body: JSON.stringify({ role, isAdmin: role === 'admin' }),
       });
       return res?.member || res?.data || { id: memberId, role };
-    } catch (err) {
-      lastErr = err;
+    } catch {
+      // ลอง endpoint ถัดไป
     }
   }
-  throw lastErr || new Error('ไม่สามารถเปลี่ยนบทบาทสมาชิกได้');
+  throw new Error('Backend ยังไม่รองรับการเปลี่ยนบทบาทสมาชิก (Method Not Allowed) กรุณาเช็ก Route ในฝั่ง Backend');
 }
