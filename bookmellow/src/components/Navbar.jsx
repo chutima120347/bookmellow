@@ -1,134 +1,182 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
-import { booksData } from '../data/data';
 
 function Navbar() {
-  const { isLoggedIn, isAdmin, member, logout } = useAuth();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user, isLoggedIn, logout } = useAuth();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  // ป้องกัน Error หาก booksData ยังไม่ได้โหลดเป็น Array
-  const safeBooksData = Array.isArray(booksData) ? booksData : [];
-
-  const searchResults = safeBooksData.filter((book) =>
-    searchTerm.trim() !== '' &&
-    (book.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     book.author?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-     book.categoryName?.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && searchTerm.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(searchTerm.trim())}`);
-      setIsOpen(false);
+  // ค้นหาหนังสือจากแถบ Navbar แล้วส่งไปหน้า Explore
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/explore?search=${encodeURIComponent(searchQuery.trim())}`);
+    } else {
+      navigate('/explore');
     }
   };
 
-  return (
-    <header className="sticky top-0 z-50 bg-[#4A2B1D] text-[#FDFBF7] shadow-md px-4 sm:px-6 py-3.5">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
-        
-        {/* โลโก้ฝั่งซ้าย */}
-        <Link to="/" className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#E8DCC4] flex-shrink-0 hover:text-white transition">
-          📚 <span>BookMellow</span>
-        </Link>
+  // ออกจากระบบ
+  const handleLogout = () => {
+    setIsDropdownOpen(false);
+    logout();
+    navigate('/auth');
+  };
 
-        {/* ฝั่งขวา: เมนู + ช่องค้นหา + ปุ่มสมาชิก */}
-        <div className="flex items-center gap-3 sm:gap-6">
-          
-          <nav className="flex items-center gap-3 sm:gap-5 text-xs sm:text-sm font-medium">
-            <Link to="/" className="hover:text-[#E8DCC4] transition">หน้าแรก</Link>
-            <Link to="/explore" className="hover:text-[#E8DCC4] transition">ค้นหาหนังสือ</Link>
+  // ตัวอักษรย่อสำหรับไอคอนโปรไฟล์
+  const userInitial = user?.displayName
+    ? user.displayName.charAt(0).toUpperCase()
+    : 'U';
+
+  return (
+    <header className="sticky top-0 z-40 bg-[#4A2B1D] text-[#FDFBF7] shadow-md border-b border-[#633A27]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        
+        {/* โลโก้ BookMellow */}
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#FDFBF7] hover:text-[#E8DCC4] transition flex-shrink-0"
+        >
+          <span>📚</span>
+          <span>BookMellow</span>
+        </button>
+
+        {/* เมนูนำทาง และ ช่องค้นหา */}
+        <div className="flex items-center gap-4 sm:gap-6 flex-1 justify-end">
+          <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium">
+            <button
+              onClick={() => navigate('/')}
+              className={`transition hover:text-[#E8DCC4] ${
+                location.pathname === '/' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
+              }`}
+            >
+              หน้าแรก
+            </button>
+            <button
+              onClick={() => navigate('/explore')}
+              className={`transition hover:text-[#E8DCC4] ${
+                location.pathname === '/explore' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
+              }`}
+            >
+              ค้นหาหนังสือ
+            </button>
             {isLoggedIn && (
-              <>
-                <Link to="/onboarding" className="hover:text-[#E8DCC4] transition">เลือกความสนใจ</Link>
-                <Link to="/favorites" className="hover:text-[#E8DCC4] transition">รายการโปรด</Link>
-              </>
+              <button
+                onClick={() => navigate('/favorites')}
+                className={`transition hover:text-[#E8DCC4] ${
+                  location.pathname === '/favorites' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
+                }`}
+              >
+                รายการโปรด
+              </button>
             )}
-            {isAdmin && (
-              <Link to="/admin" className="px-2.5 py-1 bg-[#8C533A] text-[#FDFBF7] rounded-lg text-xs font-bold hover:bg-[#633A27] transition">
-                👑 Admin
-              </Link>
+            {isLoggedIn && user?.isAdmin && (
+              <button
+                onClick={() => navigate('/admin')}
+                className={`px-3 py-1 rounded-full bg-[#8C533A] text-white text-xs font-semibold hover:bg-[#633A27] transition ${
+                  location.pathname.startsWith('/admin') ? 'ring-2 ring-[#E8DCC4]' : ''
+                }`}
+              >
+                👑 จัดการระบบ
+              </button>
             )}
           </nav>
 
-          {/* ช่องค้นหาฝั่งขวา */}
-          <div className="relative w-44 sm:w-60 hidden sm:block">
+          {/* ช่องค้นหาด่วน */}
+          <form onSubmit={handleSearchSubmit} className="relative hidden sm:block w-48 lg:w-64">
             <input
               type="text"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setIsOpen(true);
-              }}
-              onKeyDown={handleKeyDown}
-              onFocus={() => setIsOpen(true)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="ค้นหาชื่อหนังสือ, ผู้แต่ง..."
-              className="w-full px-4 py-1.5 pl-8 bg-[#633A27] text-white placeholder-amber-200/60 border border-[#8C533A] rounded-full text-xs focus:outline-none focus:ring-1 focus:ring-[#E8DCC4] shadow-sm"
+              className="w-full pl-8 pr-3 py-1.5 bg-[#633A27] border border-[#8C533A] rounded-full text-xs text-[#FDFBF7] placeholder-[#E8DCC4]/70 focus:outline-none focus:ring-1 focus:ring-[#E8DCC4]"
             />
-            <span className="absolute left-2.5 top-1.5 text-xs text-amber-200/60">🔍</span>
+            <span className="absolute left-2.5 top-1.5 text-xs text-[#E8DCC4]">🔍</span>
+          </form>
 
-            {/* Dropdown แสดงผลค้นหาเรียลไทม์ */}
-            {isOpen && searchResults.length > 0 && (
-              <div className="absolute top-9 right-0 w-72 bg-white text-[#4A2B1D] rounded-2xl shadow-xl border border-[#E8DCC4] py-2 z-50 max-h-72 overflow-y-auto">
-                <div className="px-3 py-1 text-[10px] font-bold text-gray-400 border-b border-gray-100">
-                  ผลการค้นหา ({searchResults.length} เล่ม)
-                </div>
-                {searchResults.map((book) => (
-                  <div
-                    key={book.id}
-                    onClick={() => {
-                      navigate(`/book/${book.id}`);
-                      setIsOpen(false);
-                      setSearchTerm('');
-                    }}
-                    className="px-3 py-2 hover:bg-[#F4EFE6] flex items-center gap-3 cursor-pointer transition"
-                  >
-                    <img 
-                      src={book.cover_url || book.cover} 
-                      alt={book.title} 
-                      className="w-8 h-10 object-cover rounded flex-shrink-0 bg-[#F4EFE6]" 
-                    />
-                    <div className="overflow-hidden">
-                      <p className="text-xs font-bold text-[#4A2B1D] truncate">{book.title}</p>
-                      <p className="text-[10px] text-gray-500 truncate">ผู้แต่ง: {book.author}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* สัญลักษณ์โปรไฟล์ / ปุ่มล็อกอิน */}
-          <div className="flex items-center gap-2 border-l border-[#8C533A] pl-3">
-            {isLoggedIn ? (
-              <div className="flex items-center gap-2">
-                <div 
-                  onClick={() => navigate('/user')}
-                  className="w-8 h-8 rounded-full bg-[#8C533A] text-white flex items-center justify-center text-xs font-bold shadow-sm cursor-pointer hover:bg-[#633A27] transition"
-                  title="โปรไฟล์ส่วนตัว"
-                >
-                  {member?.displayName?.charAt(0) || 'U'}
-                </div>
-                <button 
-                  onClick={() => { logout(); navigate('/'); }} 
-                  className="text-xs text-[#E8DCC4] hover:underline"
-                >
-                  ออก
-                </button>
-              </div>
-            ) : (
+          {/* ปุ่มโปรไฟล์ / เข้าสู่ระบบ */}
+          {isLoggedIn ? (
+            <div className="relative">
               <button
-                onClick={() => navigate('/auth')}
-                className="w-8 h-8 rounded-full bg-[#8C533A] text-white flex items-center justify-center text-xs font-bold shadow-sm hover:scale-105 transition"
-                title="เข้าสู่ระบบ"
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                title="ข้อมูลส่วนตัว"
+                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition"
               >
-                U
+                {userInitial}
               </button>
-            )}
-          </div>
+
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-[#E8DCC4] py-2 text-xs text-[#4A2B1D] z-50">
+                  <div className="px-4 py-2 border-b border-[#F4EFE6]">
+                    <p className="font-bold truncate">{user?.displayName || 'นักอ่าน'}</p>
+                    <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate('/profile');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
+                  >
+                    <span>👤</span> โปรไฟล์ของฉัน
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate('/favorites');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
+                  >
+                    <span>💖</span> รายการโปรด
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsDropdownOpen(false);
+                      navigate('/explore');
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2 md:hidden"
+                  >
+                    <span>🔍</span> ค้นหาหนังสือ
+                  </button>
+
+                  {user?.isAdmin && (
+                    <button
+                      onClick={() => {
+                        setIsDropdownOpen(false);
+                        navigate('/admin');
+                      }}
+                      className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
+                    >
+                      <span>👑</span> แผงควบคุม Admin
+                    </button>
+                  )}
+
+                  <div className="border-t border-[#F4EFE6] mt-1 pt-1">
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-rose-600 hover:bg-rose-50 font-semibold transition flex items-center gap-2"
+                    >
+                      <span>🚪</span> ออกจากระบบ
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0"
+            >
+              เข้าสู่ระบบ
+            </button>
+          )}
         </div>
       </div>
     </header>
