@@ -39,7 +39,7 @@ function ResetPassword() {
 
     try {
       setIsLoading(true);
-      await apiRequest('/api/auth/reset-password', {
+      await apiRequest('/api/auth/forgot-password', {
         method: 'POST',
         body: JSON.stringify({
           email: trimmedEmail,
