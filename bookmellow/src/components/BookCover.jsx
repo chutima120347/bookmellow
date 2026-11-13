@@ -1,5 +1,3 @@
-import React from 'react';
-
 const BookCover = ({ src, title, className = "" }) => {
   const defaultPlaceholder = "https://placehold.co/300x400/FFDFDF/4A3E3D?text=BookMellow";
 

@@ -31,12 +31,11 @@ function Explore() {
   const queryParams = new URLSearchParams(location.search);
   const searchFromUrl = queryParams.get('search') || '';
 
-  const [books, setBooks] = useState([]); // เก็บข้อมูลหนังสือจาก Backend
-  const [loading, setLoading] = useState(true); // สถานะกำลังโหลด
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState(searchFromUrl);
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  // ดึงข้อมูลหนังสือทั้งหมดจาก Backend ทันทีที่เปิดหน้า Explore
   useEffect(() => {
     const fetchBooks = async () => {
       try {
@@ -62,50 +61,31 @@ function Explore() {
   }, [location.search]);
 
   const filteredBooks = books.filter((book) => {
-    const bookCategories = Array.isArray(book.categories)
-      ? book.categories
-      : [book.category || ''];
-
-    const matchesCategory =
-      selectedCategory === 'all' || bookCategories.includes(selectedCategory);
-
+    const bookCategories = Array.isArray(book.categories) ? book.categories : [book.category || ''];
+    const matchesCategory = selectedCategory === 'all' || bookCategories.includes(selectedCategory);
     const query = searchQuery.toLowerCase().trim();
-    const matchesSearch =
-      book.title?.toLowerCase().includes(query) ||
-      book.author?.toLowerCase().includes(query) ||
-      book.categoryName?.toLowerCase().includes(query);
-
+    const matchesSearch = book.title?.toLowerCase().includes(query) || book.author?.toLowerCase().includes(query) || book.categoryName?.toLowerCase().includes(query);
     return matchesCategory && matchesSearch;
   });
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#4A2B1D]">
       <Navbar />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 text-[#4A2B1D]">
-            <span>หนังสือทั้งหมด</span>
-          </h1>
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2 text-[#4A2B1D]"><span>หนังสือทั้งหมด</span></h1>
           {searchQuery && (
-            <p className="text-xs text-[#8C533A] font-medium mt-1">
-              ผลการค้นหาสำหรับ: "{searchQuery}" ({filteredBooks.length} เล่ม)
-            </p>
+            <p className="text-xs text-[#8C533A] font-medium mt-1"> ผลการค้นหาสำหรับ: "{searchQuery}" ({filteredBooks.length} เล่ม)</p>
           )}
         </div>
 
         <div className="grid md:grid-cols-4 gap-8">
-          {/* แถบตัวกรองฝั่งซ้าย */}
           <aside className="bg-white p-6 rounded-2xl border border-[#E8DCC4] shadow-sm h-fit space-y-6">
             <div>
               <h3 className="font-bold text-sm mb-3 text-[#4A2B1D]">🔍 ค้นหาหนังสือ</h3>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="พิมพ์ชื่อหนังสือ หรือ ผู้แต่ง..."
-                className="w-full px-3 py-2 bg-[#F4EFE6] border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-              />
+                className="w-full px-3 py-2 bg-[#F4EFE6] border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"/>
             </div>
 
             <div>
@@ -115,18 +95,9 @@ function Explore() {
                   <label
                     key={cat.id}
                     className={`flex items-center gap-2.5 p-2 rounded-xl cursor-pointer transition ${
-                      selectedCategory === cat.id
-                        ? 'bg-[#F4EFE6] text-[#8C533A] font-bold border border-[#E8DCC4]'
-                        : 'hover:bg-gray-50 text-gray-700'
-                    }`}
-                  >
-                    <input
-                      type="radio"
-                      name="categoryFilter"
-                      checked={selectedCategory === cat.id}
-                      onChange={() => setSelectedCategory(cat.id)}
-                      className="accent-[#8C533A]"
-                    />
+                      selectedCategory === cat.id ? 'bg-[#F4EFE6] text-[#8C533A] font-bold border border-[#E8DCC4]' : 'hover:bg-gray-50 text-gray-700'}`}>
+                    <input type="radio" name="categoryFilter" checked={selectedCategory === cat.id}
+                      onChange={() => setSelectedCategory(cat.id)} className="accent-[#8C533A]"/>
                     <span>{cat.icon} {cat.label}</span>
                   </label>
                 ))}
@@ -134,7 +105,6 @@ function Explore() {
             </div>
           </aside>
 
-          {/* รายการแสดงหนังสือฝั่งขวา */}
           <section className="md:col-span-3 space-y-6">
             {loading ? (
               <div className="text-center py-12 bg-white rounded-2xl border border-[#E8DCC4]">
@@ -145,39 +115,27 @@ function Explore() {
                 {filteredBooks.length > 0 ? (
                   filteredBooks.map((book) => {
                     const firstCategory = Array.isArray(book.categories) && book.categories.length > 0
-                      ? book.categories[0]
-                      : (book.category || 'ทั่วไป');
-
+                      ? book.categories[0] : (book.category || 'ทั่วไป');
                     return (
                       <div
                         key={book.id}
                         onClick={() => navigate(`/book/${book.id}`)}
-                        className="group bg-white rounded-2xl p-3 sm:p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
-                      >
+                        className="group bg-white rounded-2xl p-3 sm:p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between">
                         <div className="space-y-3">
                           <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
                             {BookCover ? (
                               <BookCover src={book.cover_url || book.cover} title={book.title} />
                             ) : (
-                              <img
-                                src={book.cover_url || book.cover}
-                                alt={book.title}
-                                className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                              />
+                              <img src={book.cover_url || book.cover} alt={book.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-300"/>
                             )}
-
                             <span className="absolute top-2 left-2 text-[10px] font-semibold px-2 py-0.5 rounded-full border bg-white/90 text-[#8C533A] border-[#E8DCC4]">
                               {book.badge || firstCategory}
                             </span>
                           </div>
 
                           <div>
-                            <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1">
-                              {book.title}
-                            </h3>
-                            <p className="text-xs text-gray-500 truncate">
-                              ผู้แต่ง: {book.author}
-                            </p>
+                            <h3 className="font-bold text-sm text-[#4A2B1D] truncate mt-1"> {book.title}</h3>
+                            <p className="text-xs text-gray-500 truncate"> ผู้แต่ง: {book.author}</p>
                           </div>
                         </div>
 
@@ -185,9 +143,7 @@ function Explore() {
                           <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2 py-0.5 rounded-full truncate max-w-[100px]">
                             {book.categoryName || firstCategory}
                           </span>
-                          <span className="text-xs font-semibold text-[#8C533A] group-hover:underline">
-                            รายละเอียด &gt;
-                          </span>
+                          <span className="text-xs font-semibold text-[#8C533A] group-hover:underline">รายละเอียด &gt;</span>
                         </div>
                       </div>
                     );

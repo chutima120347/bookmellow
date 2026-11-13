@@ -20,19 +20,15 @@ function BookDetail() {
   const [reviewsList, setReviewsList] = useState([]);
   const [activeTab, setActiveTab] = useState('description');
 
-  // ดึงข้อมูลรายละเอียดหนังสือจาก Backend
   useEffect(() => {
     async function loadBookData() {
       try {
         setIsLoading(true);
-        
-        // 1. ลองยิง API ดึงข้อมูลรายเล่มก่อน
         let foundBook = null;
         try {
           const bookRes = await apiRequest(`/api/books/${id}`);
           foundBook = bookRes?.book || bookRes?.data || bookRes;
         } catch (apiErr) {
-          // 2. ถ้า Backend ไม่มี route /api/books/:id ให้ดึงทั้งหมดมาค้นหาตาม id แทน
           try {
             const allRes = await apiRequest('/api/books');
             const allBooks = Array.isArray(allRes) ? allRes : (allRes?.books || allRes?.data || []);
@@ -44,15 +40,11 @@ function BookDetail() {
 
         setBook(foundBook && foundBook.id ? foundBook : null);
 
-        // 3. ดึงรีวิวของหนังสือ
         try {
           const reviewRes = await apiRequest(`/api/books/${id}/reviews`);
           setReviewsList(reviewRes?.reviews || reviewRes?.data || (Array.isArray(reviewRes) ? reviewRes : []));
-        } catch (err) {
-          setReviewsList([]);
-        }
+        } catch (err) { setReviewsList([]); }
 
-        // 4. ตรวจสอบรายการโปรด
         if (isLoggedIn) {
           try {
             const favRes = await apiRequest('/api/me/favorites');
@@ -62,11 +54,8 @@ function BookDetail() {
             console.error('Failed to check favorites:', err);
           }
         }
-      } catch (err) {
-        console.error('Failed to load book detail:', err);
-      } finally {
-        setIsLoading(false);
-      }
+      } catch (err) { console.error('Failed to load book detail:', err);
+      } finally { setIsLoading(false); }
     }
 
     if (id) {
@@ -86,14 +75,11 @@ function BookDetail() {
         setIsFavorite(false);
       } else {
         await apiRequest('/api/me/favorites', {
-          method: 'POST',
-          body: JSON.stringify({ book_id: book.id }),
+          method: 'POST', body: JSON.stringify({ book_id: book.id }),
         });
         setIsFavorite(true);
       }
-    } catch (err) {
-      setIsFavorite(!isFavorite);
-    }
+    } catch (err) { setIsFavorite(!isFavorite); }
   };
 
   const handleSubmitReview = async (e) => {
@@ -104,23 +90,12 @@ function BookDetail() {
     }
     if (!reviewComment.trim()) return;
 
-    const newReview = {
-      id: Date.now(),
-      user_id: 'me',
-      username: 'คุณ',
-      rating: userRating,
-      comment: reviewComment,
-      created_at: new Date().toISOString(),
-    };
+    const newReview = { id: Date.now(), user_id: 'me', username: 'คุณ', rating: userRating, comment: reviewComment, created_at: new Date().toISOString() };
 
     try {
       await apiRequest(`/api/books/${id}/reviews`, {
-        method: 'POST',
-        body: JSON.stringify({ rating: userRating, comment: reviewComment }),
-      });
-    } catch (err) {
-      console.warn('API review failed, adding locally');
-    }
+        method: 'POST', body: JSON.stringify({ rating: userRating, comment: reviewComment }),});
+    } catch (err) { console.warn('API review failed, adding locally'); }
 
     setReviewsList([newReview, ...reviewsList]);
     setReviewComment('');
@@ -145,51 +120,33 @@ function BookDetail() {
   }
 
   const categoryText = Array.isArray(book.categories) && book.categories.length > 0
-    ? book.categories.join(', ')
-    : (book.category || 'ทั่วไป');
+    ? book.categories.join(', ') : (book.category || 'ทั่วไป');
 
   const mainCategory = Array.isArray(book.categories) && book.categories.length > 0
-    ? book.categories[0]
-    : categoryText;
+    ? book.categories[0] : categoryText;
 
   const averageRating = reviewsList.length > 0
-    ? (reviewsList.reduce((acc, r) => acc + (r.rating || 5), 0) / reviewsList.length).toFixed(1)
-    : (book.rating || '4.8');
+    ? (reviewsList.reduce((acc, r) => acc + (r.rating || 5), 0) / reviewsList.length).toFixed(1) : (book.rating || '4.8');
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#4A2B1D] font-sans">
       <Navbar />
-
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        
-        {/* Main Info */}
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8DCC4] shadow-sm grid md:grid-cols-3 gap-8">
-          
           <div className="flex flex-col items-center space-y-4">
             <div className="relative w-full max-w-[240px] aspect-[3/4] rounded-2xl overflow-hidden shadow-md bg-[#F4EFE6] border border-[#E8DCC4]">
-              {BookCover ? (
-                <BookCover src={book.cover_url || book.cover} title={book.title} />
+              {BookCover ? ( <BookCover src={book.cover_url || book.cover} title={book.title} />
               ) : (
-                <img
-                  src={book.cover_url || book.cover}
-                  alt={book.title}
-                  className="w-full h-full object-cover"
-                />
-              )}
+                <img src={book.cover_url || book.cover} alt={book.title} className="w-full h-full object-cover"/>)}
               
-              <span className="absolute top-3 left-3 text-[11px] font-semibold px-3 py-1 rounded-full border bg-white/95 text-[#8C533A] border-[#E8DCC4] shadow-sm">
-                {mainCategory}
-              </span>
+              <span className="absolute top-3 left-3 text-[11px] font-semibold px-3 py-1 rounded-full border bg-white/95 text-[#8C533A] border-[#E8DCC4] shadow-sm">{mainCategory}</span>
             </div>
 
             <button
               onClick={handleToggleFavorite}
               className={`w-full max-w-[240px] py-2.5 rounded-full font-semibold text-xs sm:text-sm shadow-sm transition flex items-center justify-center gap-2 ${
                 isFavorite 
-                  ? 'bg-[#F4EFE6] text-[#8C533A] border border-[#E8DCC4]' 
-                  : 'bg-[#8C533A] hover:bg-[#633A27] text-white'
-              }`}
-            >
+                  ? 'bg-[#F4EFE6] text-[#8C533A] border border-[#E8DCC4]' : 'bg-[#8C533A] hover:bg-[#633A27] text-white'}`}>
               <span>{isFavorite ? '💖 อยู่ในรายการโปรดแล้ว' : '🤍 เพิ่มลงรายการโปรด'}</span>
             </button>
           </div>
@@ -198,9 +155,7 @@ function BookDetail() {
             <div>
               <span className="text-xs px-3 py-1 bg-[#F4EFE6] text-[#8C533A] rounded-full border border-[#E8DCC4] font-semibold">หมวดหมู่: {categoryText}</span>
               <h1 className="text-2xl sm:text-3xl font-bold text-[#4A2B1D] mt-3 leading-snug">{book.title}</h1>
-              {book.subtitle && (
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">{book.subtitle}</p>
-              )}
+              {book.subtitle && ( <p className="text-xs sm:text-sm text-gray-500 mt-1">{book.subtitle}</p>)}
               <p className="text-xs sm:text-sm text-gray-500 mt-2">
                 ผู้เขียน: <span className="text-[#633A27] font-semibold">{book.author}</span>
                 {book.publisher && ` | สำนักพิมพ์: ${book.publisher}`}
@@ -228,24 +183,15 @@ function BookDetail() {
             <button
               onClick={() => setActiveTab('description')}
               className={`pb-3 transition relative ${
-                activeTab === 'description'
-                  ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
-                  : 'text-gray-400 hover:text-[#4A2B1D]'
-              }`}>เรื่องย่อ</button>
+                activeTab === 'description' ? 'text-[#8C533A] border-b-2 border-[#8C533A]' : 'text-gray-400 hover:text-[#4A2B1D]'}`}>เรื่องย่อ</button>
             <button
               onClick={() => setActiveTab('details')}
               className={`pb-3 transition relative ${
-                activeTab === 'details'
-                  ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
-                  : 'text-gray-400 hover:text-[#4A2B1D]'
-              }`}>ข้อมูลหนังสือ</button>
+                activeTab === 'details' ? 'text-[#8C533A] border-b-2 border-[#8C533A]' : 'text-gray-400 hover:text-[#4A2B1D]'}`}>ข้อมูลหนังสือ</button>
             <button
               onClick={() => setActiveTab('reviews')}
               className={`pb-3 transition relative ${
-                activeTab === 'reviews'
-                  ? 'text-[#8C533A] border-b-2 border-[#8C533A]'
-                  : 'text-gray-400 hover:text-[#4A2B1D]'
-              }`}>รีวิวจากผู้อ่าน ({reviewsList.length})</button>
+                activeTab === 'reviews' ? 'text-[#8C533A] border-b-2 border-[#8C533A]' : 'text-gray-400 hover:text-[#4A2B1D]'}`}>รีวิวจากผู้อ่าน ({reviewsList.length})</button>
           </div>
 
           {activeTab === 'description' && (
@@ -286,13 +232,9 @@ function BookDetail() {
                       </div>
                     </div>
                     <textarea
-                      rows="3"
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      placeholder="แชร์ความรู้สึกของคุณหลังอ่านเรื่องนี้..."
-                      required
-                      className="w-full p-3 bg-white border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                    ></textarea>
+                      rows="3" value={reviewComment} onChange={(e) => setReviewComment(e.target.value)} placeholder="แชร์ความรู้สึกของคุณหลังอ่านเรื่องนี้..." required
+                      className="w-full p-3 bg-white border border-[#E8DCC4] rounded-xl text-xs text-[#4A2B1D] focus:outline-none focus:ring-1 focus:ring-[#8C533A]">
+                    </textarea>
                     <button type="submit" className="px-5 py-2 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-full text-xs font-semibold shadow-sm transition">ส่งรีวิว</button>
                   </form>
                 ) : (

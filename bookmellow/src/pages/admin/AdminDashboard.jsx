@@ -20,7 +20,6 @@ function StatCard({ label, value, to }) {
 
 const dateTH = (iso) => new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 
-
 function AdminDashboard() {
   const { user } = useAuth();
   const [stats, setStats] = useState(null);
@@ -34,14 +33,11 @@ function AdminDashboard() {
       setStatus('loading');
       setError(null);
       try {
-        // ดึงข้อมูลภาพรวมจาก API ของ BookMellow
         let dashboardRes = null;
         try {
           const res = await apiRequest('/api/admin/dashboard');
           dashboardRes = res?.data || res;
-        } catch {
-          dashboardRes = null;
-        }
+        } catch { dashboardRes = null; }
 
         const booksRes = await apiRequest('/api/books');
         const booksList = Array.isArray(booksRes) ? booksRes : (booksRes?.books || booksRes?.data || []);
@@ -50,9 +46,7 @@ function AdminDashboard() {
         try {
           const membersRes = await apiRequest('/api/admin/members');
           membersList = Array.isArray(membersRes) ? membersRes : (membersRes?.members || membersRes?.data || []);
-        } catch {
-          membersList = [];
-        }
+        } catch { membersList = []; }
 
         const adminCount = membersList.filter((m) => String(m.role || '').toLowerCase() === 'admin' || m.isAdmin === true).length;
 
@@ -87,7 +81,6 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#4A2B1D] flex flex-col justify-between font-sans">
       <Navbar />
-
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
@@ -172,7 +165,6 @@ function AdminDashboard() {
           </div>
         )}
       </main>
-
       <Footer />
     </div>
   );

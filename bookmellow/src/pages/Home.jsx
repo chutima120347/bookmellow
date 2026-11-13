@@ -28,7 +28,6 @@ const categoryOptions = [
 function Home() {
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-
   const [books, setBooks] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -47,7 +46,6 @@ function Home() {
         setLoading(false);
       }
     };
-
     fetchBooks();
   }, []);
 
@@ -96,39 +94,25 @@ function Home() {
   };
 
   const filteredBooks = books.filter((book) => {
-    const bookCategories = Array.isArray(book.categories)
-      ? book.categories
-      : [book.category || ''];
-
+    const bookCategories = Array.isArray(book.categories) ? book.categories : [book.category || ''];
     return selectedCategory === 'all' || bookCategories.includes(selectedCategory);
   });
 
   return (
     <div className="min-h-screen bg-[#FDFBF7] text-[#4A2B1D] font-sans">
       <Navbar />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-12">
 
         {/* 1. Hero Banner */}
         <section className="relative overflow-hidden bg-[#633A27] text-[#FDFBF7] rounded-3xl p-8 sm:p-12 shadow-md">
           <div className="relative z-10 max-w-2xl space-y-4">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[#FDFBF7]">
-              หนังสือดีๆ ที่จะทำให้ทุกวันของคุณอบอุ่นขึ้น
-            </h1>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight text-[#FDFBF7]">หนังสือดีๆ ที่จะทำให้ทุกวันของคุณอบอุ่นขึ้น</h1>
             <p className="text-sm sm:text-base text-[#E8DCC4] leading-relaxed">ค้นพบหนังสือและเรื่องราวสุดประทับใจที่เหมาะกับคุณวันนี้</p>
             <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => navigate('/explore')}
-                className="bg-[#8C533A] hover:bg-[#4A2B1D] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2"
-              >
-                เริ่มค้นหาหนังสือ
-              </button>
-              <button
-                onClick={() => navigate('/interests')}
-                className="bg-[#FDFBF7] hover:bg-[#E8DCC4] text-[#4A2B1D] px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2"
-              >
-                เลือกตามความสนใจ
-              </button>
+              <button onClick={() => navigate('/explore')}
+                className="bg-[#8C533A] hover:bg-[#4A2B1D] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2">เริ่มค้นหาหนังสือ</button>
+              <button onClick={() => navigate('/interests')}
+                className="bg-[#FDFBF7] hover:bg-[#E8DCC4] text-[#4A2B1D] px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2">เลือกตามความสนใจ</button>
             </div>
           </div>
         </section>
@@ -144,17 +128,9 @@ function Home() {
 
           <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
             {categoryOptions.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
+              <button key={cat.id} onClick={() => setSelectedCategory(cat.id)}
                 className={`flex-shrink-0 px-4 py-2 rounded-2xl border text-xs sm:text-sm font-medium transition-all ${
-                  selectedCategory === cat.id
-                    ? 'bg-[#8C533A] text-white border-[#8C533A] shadow-sm'
-                    : 'bg-white text-[#4A2B1D] border-[#E8DCC4] hover:bg-[#F4EFE6]'
-                }`}
-              >
-                {cat.label}
-              </button>
+                  selectedCategory === cat.id ? 'bg-[#8C533A] text-white border-[#8C533A] shadow-sm' : 'bg-white text-[#4A2B1D] border-[#E8DCC4] hover:bg-[#F4EFE6]'}`}> {cat.label}</button>
             ))}
           </div>
         </section>
@@ -164,9 +140,7 @@ function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-bold flex items-center gap-2 text-[#4A2B1D]">หนังสือแนะนำ</h2>
-              <p className="text-xs text-gray-500">
-                กำลังแสดงหนังสือทั้งหมด {filteredBooks.length} เล่ม
-              </p>
+              <p className="text-xs text-gray-500">กำลังแสดงหนังสือทั้งหมด {filteredBooks.length} เล่ม</p>
             </div>
           </div>
 
@@ -179,16 +153,13 @@ function Home() {
               {filteredBooks.length > 0 ? (
                 filteredBooks.map((book) => {
                   const isFav = favorites.includes(book.id);
-                  const firstCategory = Array.isArray(book.categories) && book.categories.length > 0
-                    ? book.categories[0]
-                    : (book.category || 'ทั่วไป');
+                  const firstCategory = Array.isArray(book.categories) && book.categories.length > 0 ? book.categories[0] : (book.category || 'ทั่วไป');
 
                   return (
                     <div
                       key={book.id}
                       onClick={() => navigate(`/book/${book.id}`)}
-                      className="group bg-white rounded-2xl p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between"
-                    >
+                      className="group bg-white rounded-2xl p-4 border border-[#E8DCC4] shadow-sm hover:shadow-md transition cursor-pointer flex flex-col justify-between">
                       <div className="space-y-3">
                         <div className="relative aspect-[3/4] rounded-xl overflow-hidden bg-[#F4EFE6]">
                           <BookCover src={book.cover_url || book.cover} title={book.title} />
@@ -199,10 +170,7 @@ function Home() {
 
                           <button
                             onClick={(e) => toggleFavorite(e, book.id)}
-                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-rose-500 shadow-sm hover:scale-110 transition"
-                          >
-                            {isFav ? '💖' : '🤍'}
-                          </button>
+                            className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-rose-500 shadow-sm hover:scale-110 transition">{isFav ? '💖' : '🤍'}</button>
                         </div>
 
                         <div>
@@ -215,9 +183,7 @@ function Home() {
                         <span className="text-[10px] text-[#8C533A] bg-[#F4EFE6] px-2 py-0.5 rounded-full truncate max-w-[110px]">
                           {book.reason || book.description || 'แนะนำสำหรับคุณ'}
                         </span>
-                        <span className="text-xs font-semibold text-[#8C533A] group-hover:underline flex-shrink-0">
-                          รายละเอียด &gt;
-                        </span>
+                        <span className="text-xs font-semibold text-[#8C533A] group-hover:underline flex-shrink-0">รายละเอียด &gt;</span>
                       </div>
                     </div>
                   );

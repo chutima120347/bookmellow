@@ -67,7 +67,7 @@ function ResetPassword() {
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
         >
-          📚 <span>BookMellow</span>
+          <span>BookMellow</span>
         </button>
       </div>
 

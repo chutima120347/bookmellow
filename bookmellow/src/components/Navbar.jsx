@@ -34,80 +34,44 @@ function Navbar() {
         
         <button
           onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#FDFBF7] hover:text-[#E8DCC4] transition flex-shrink-0"
-        >
-          <span>📚</span>
+          className="flex items-center gap-2 text-xl sm:text-2xl font-bold text-[#FDFBF7] hover:text-[#E8DCC4] transition flex-shrink-0">
           <span>BookMellow</span>
         </button>
 
         <div className="flex items-center gap-4 sm:gap-6 flex-1 justify-end">
           <nav className="hidden md:flex items-center gap-6 text-xs sm:text-sm font-medium">
             <button
-              onClick={() => navigate('/')}
-              className={`transition hover:text-[#E8DCC4] ${
-                location.pathname === '/' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
-              }`}
-            >
-              หน้าแรก
-            </button>
+              onClick={() => navigate('/')} className={`transition hover:text-[#E8DCC4] ${
+              location.pathname === '/' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'}`}>หน้าแรก</button>
             <button
-              onClick={() => navigate('/explore')}
-              className={`transition hover:text-[#E8DCC4] ${
-                location.pathname === '/explore' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
-              }`}
-            >
-              ค้นหาหนังสือ
-            </button>
+              onClick={() => navigate('/explore')} className={`transition hover:text-[#E8DCC4] ${
+              location.pathname === '/explore' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'}`}>ค้นหาหนังสือ</button>
             <button
-              onClick={() => navigate('/recommendations')}
-              className={`transition hover:text-[#E8DCC4] ${
-                location.pathname === '/recommendations' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
-              }`}
-            >
-              หนังสือแนะนำ
-            </button>
+              onClick={() => navigate('/recommendations')} className={`transition hover:text-[#E8DCC4] ${
+              location.pathname === '/recommendations' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'}`}>หนังสือแนะนำ</button>
             {isLoggedIn && (
               <button
-                onClick={() => navigate('/favorites')}
-                className={`transition hover:text-[#E8DCC4] ${
-                  location.pathname === '/favorites' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
-                }`}
-              >
-                รายการโปรด
-              </button>
+                onClick={() => navigate('/favorites')} className={`transition hover:text-[#E8DCC4] ${
+                location.pathname === '/favorites' ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'}`}>รายการโปรด</button>
             )}
             {isLoggedIn && isAdmin && (
               <button
-                onClick={() => navigate('/admin')}
-                className={`transition hover:text-[#E8DCC4] ${
-                  location.pathname.startsWith('/admin') ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'
-                }`}
-              >
-                แดชบอร์ด
-              </button>
+                onClick={() => navigate('/admin')} className={`transition hover:text-[#E8DCC4] ${
+                location.pathname.startsWith('/admin') ? 'text-[#E8DCC4] font-bold underline underline-offset-4' : 'text-[#FDFBF7]/90'}`}>แดชบอร์ด</button>
             )}
           </nav>
 
           <form onSubmit={handleSearchSubmit} className="relative hidden sm:block w-48 lg:w-64">
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="ค้นหาชื่อหนังสือ, ผู้แต่ง..."
-              className="w-full pl-8 pr-3 py-1.5 bg-[#633A27] border border-[#8C533A] rounded-full text-xs text-[#FDFBF7] placeholder-[#E8DCC4]/70 focus:outline-none focus:ring-1 focus:ring-[#E8DCC4]"
-            />
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="ค้นหาชื่อหนังสือ, ผู้แต่ง..."
+              className="w-full pl-8 pr-3 py-1.5 bg-[#633A27] border border-[#8C533A] rounded-full text-xs text-[#FDFBF7] placeholder-[#E8DCC4]/70 focus:outline-none focus:ring-1 focus:ring-[#E8DCC4]"/>
             <span className="absolute left-2.5 top-1.5 text-xs text-[#E8DCC4]">🔍</span>
           </form>
 
           {isLoggedIn ? (
             <div className="relative">
               <button
-                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                title="ข้อมูลส่วนตัว"
-                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition"
-              >
-                {userInitial}
-              </button>
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)} title="ข้อมูลส่วนตัว"
+                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition">{userInitial}</button>
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-[#E8DCC4] py-2 text-xs text-[#4A2B1D] z-50">
@@ -116,35 +80,15 @@ function Navbar() {
                     <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
                   </div>
 
-                  <button
-                    onClick={() => {
-                      setIsDropdownOpen(false);
-                      navigate('/profile');
-                    }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
-                  >
-                    โปรไฟล์ของฉัน
-                  </button>
+                  <button onClick={() => { setIsDropdownOpen(false); navigate('/profile');}}
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2">โปรไฟล์ของฉัน</button>
 
-                  {isAdmin && (
-                    <button
-                      onClick={() => {
-                        setIsDropdownOpen(false);
-                        navigate('/admin');
-                      }}
-                      className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
-                    >
-                      แดชบอร์ด
-                    </button>
-                  )}
+                  {isAdmin && ( <button onClick={() => { setIsDropdownOpen(false); navigate('/admin');}}
+                      className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2">แดชบอร์ด</button>)}
 
                   <div className="border-t border-[#F4EFE6] mt-1 pt-1">
-                    <button
-                      onClick={handleLogout}
-                      className="w-full text-left px-4 py-2 text-rose-600 hover:bg-rose-50 font-semibold transition flex items-center gap-2"
-                    >
-                      ออกจากระบบ
-                    </button>
+                    <button onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-rose-600 hover:bg-rose-50 font-semibold transition flex items-center gap-2">ออกจากระบบ</button>
                   </div>
                 </div>
               )}
@@ -152,15 +96,11 @@ function Navbar() {
           ) : (
             <button
               onClick={() => navigate('/login')}
-              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0"
-            >
-              เข้าสู่ระบบ
-            </button>
+              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0">เข้าสู่ระบบ</button>
           )}
         </div>
       </div>
     </header>
   );
 }
-
 export default Navbar;

@@ -2,9 +2,6 @@
 // ชี้ตรงไปที่ Backend บน Render ของคุณเลย (ไม่มี / ปิดท้าย)
 export const API_BASE_URL = 'https://bookmellow-backend.onrender.com';
 
-/**
- * ฟังก์ชันกลางสำหรับเรียกใช้งาน API
- */
 export async function apiRequest(endpoint, options = {}) {
   // ดึง Token จาก localStorage (ถ้ามี)
   const token = localStorage.getItem('token');
@@ -100,7 +97,6 @@ export async function setMemberRole(memberId, role) {
       });
       return res?.member || res?.data || { id: memberId, role };
     } catch {
-      // ลอง endpoint ถัดไป
     }
   }
   throw new Error('Backend ยังไม่รองรับการเปลี่ยนบทบาทสมาชิก (Method Not Allowed) กรุณาเช็ก Route ในฝั่ง Backend');

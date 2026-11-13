@@ -21,7 +21,6 @@ function Favorites() {
       }
       try {
         const res = await apiRequest('/api/me/favorites');
-        // รองรับทั้งกรณีที่ Backend ส่งกลับมาเป็น Array ตรงๆ หรืออยู่ใน .data / .favorites
         const favList = Array.isArray(res) ? res : (res?.data || res?.favorites || []);
         setFavoriteBooks(favList);
       } catch (err) {
@@ -33,7 +32,7 @@ function Favorites() {
     fetchFavorites();
   }, [isLoggedIn]);
 
-  // ลบออกจากรายการโปรด (ใช้ Book ID ใน URL Path)
+  // ลบออกจากรายการโปรด
   const handleRemoveFavorite = async (e, bookId) => {
     e.stopPropagation();
     try {
@@ -49,7 +48,6 @@ function Favorites() {
   return (
     <div className="min-h-screen bg-[#FAF7F0] text-[#4A3E3D]">
       <Navbar />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2"><span>รายการโปรดของฉัน</span></h1>
@@ -62,9 +60,7 @@ function Favorites() {
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
             {favoriteBooks.map((book) => {
               const categoryBadge = Array.isArray(book.categories) && book.categories.length > 0 
-                ? book.categories[0] 
-                : (book.category || 'ทั่วไป');
-
+                ? book.categories[0] : (book.category || 'ทั่วไป');
               return (
                 <div
                   key={book.id}
@@ -78,8 +74,7 @@ function Favorites() {
                       </span>
                       
                       <button
-                        onClick={(e) => handleRemoveFavorite(e, book.id)}
-                        title="ลบออกจากรายการโปรด"
+                        onClick={(e) => handleRemoveFavorite(e, book.id)} title="ลบออกจากรายการโปรด"
                         className="absolute top-2 right-2 w-7 h-7 rounded-full bg-white/90 flex items-center justify-center text-pink-500 shadow-sm hover:bg-pink-50 hover:scale-110 transition">💖</button>
                     </div>
 

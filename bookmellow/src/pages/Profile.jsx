@@ -8,7 +8,6 @@ import { apiRequest } from '../services/api';
 function Profile() {
   const navigate = useNavigate();
   const { user, isLoggedIn, logout } = useAuth();
-
   const [profile, setProfile] = useState(user || null);
   const [loading, setLoading] = useState(true);
 
@@ -55,7 +54,6 @@ function Profile() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#4A2B1D] flex flex-col justify-between font-sans">
       <Navbar />
-
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
         {loading && !profile ? (
           <div className="rounded-3xl border border-[#E6E0D6] bg-white p-14 text-center text-sm text-[#8C533A] animate-pulse">กำลังโหลดข้อมูลโปรไฟล์...</div>
@@ -103,7 +101,6 @@ function Profile() {
           </>
         )}
       </main>
-
       <Footer />
     </div>
   );

@@ -6,24 +6,13 @@ import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../services/api';
 
 const interestCategories = [
-  'Adventure',
-  'Biography',
-  'Children',
-  'Education',
-  'Fantasy',
-  'Horror',
-  'Mystery',
-  'Romance',
-  'Science Fiction',
-  'Self-Help',
-  'Thriller',
-  'Young Adult',
-];
+  'Adventure', 'Biography', 'Children', 'Education', 'Fantasy',
+  'Horror', 'Mystery', 'Romance', 'Science Fiction', 'Self-Help', 
+  'Thriller', 'Young Adult', 'Children', 'Poetry', 'Adventure'];
 
 function Onboarding() {
   const navigate = useNavigate();
   const { user, isLoggedIn } = useAuth();
-
   const [selectedInterests, setSelectedInterests] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
   const [isSavedSuccess, setIsSavedSuccess] = useState(false);
@@ -58,11 +47,7 @@ function Onboarding() {
 
   const toggleCategory = (category) => {
     setIsSavedSuccess(false);
-    setSelectedInterests((prev) =>
-      prev.includes(category)
-        ? prev.filter((item) => item !== category)
-        : [...prev, category]
-    );
+    setSelectedInterests((prev) => prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category]);
   };
 
   const handleSaveInterests = async () => {
@@ -80,19 +65,12 @@ function Onboarding() {
           { url: '/api/user/interests', method: 'POST' },
           { url: '/api/user/interests', method: 'PUT' },
           { url: '/api/users/interests', method: 'POST' },
-          { url: '/api/interests', method: 'POST' },
+          { url: '/api/interests', method: 'POST' }
         ];
 
         for (const ep of endpoints) {
           try {
-            await apiRequest(ep.url, {
-              method: ep.method,
-              body: JSON.stringify({
-                userId: user?.id,
-                interests: selectedInterests,
-                categories: selectedInterests,
-              }),
-            });
+            await apiRequest(ep.url, { method: ep.method, body: JSON.stringify({ userId: user?.id, interests: selectedInterests, categories: selectedInterests})});
             break;
           } catch {
           }
@@ -111,7 +89,6 @@ function Onboarding() {
   return (
     <div className="min-h-screen bg-[#FAF6EE] text-[#3B261C] flex flex-col justify-between font-sans">
       <Navbar />
-
       <main className="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
         <div className="text-center space-y-3 mb-12">
           <p className="text-xs font-semibold tracking-[0.18em] text-[#8C6D5E] uppercase">YOUR READING INTERESTS</p>
@@ -128,16 +105,10 @@ function Onboarding() {
           {interestCategories.map((category) => {
             const isSelected = selectedInterests.includes(category);
             return (
-              <button
-                key={category}
-                type="button"
-                onClick={() => toggleCategory(category)}
+              <button key={category} type="button" onClick={() => toggleCategory(category)}
                 className={`h-16 sm:h-[72px] px-4 rounded-2xl border text-xs sm:text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
                   isSelected
-                    ? 'bg-[#7A5644] text-white border-[#7A5644] shadow-sm'
-                    : 'bg-white text-[#3B261C] border-[#EBE4D8] hover:border-[#C8B8A6] hover:bg-[#FDFBF7]'
-                }`}
-              >
+                    ? 'bg-[#7A5644] text-white border-[#7A5644] shadow-sm' : 'bg-white text-[#3B261C] border-[#EBE4D8] hover:border-[#C8B8A6] hover:bg-[#FDFBF7]'}`}>
                 {isSelected && <span className="text-sm font-bold">✓</span>}
                 <span>{category}</span>
               </button>
@@ -164,7 +135,6 @@ function Onboarding() {
           </div>
         )}
       </main>
-
       <Footer />
     </div>
   );

@@ -27,9 +27,7 @@ function ManageBooks() {
   const [description, setDescription] = useState('');
 
   // 1. ดึงรายการหนังสือทั้งหมดจาก Backend
-  useEffect(() => {
-    fetchBooks();
-  }, []);
+  useEffect(() => { fetchBooks(); }, []);
 
   const fetchBooks = async () => {
     try {
@@ -49,13 +47,8 @@ function ManageBooks() {
     }
   };
 
-  // ระบบค้นหาหนังสือ
-  const filteredBooks = books.filter((b) =>
-    b.title?.toLowerCase().includes(search.toLowerCase()) ||
-    b.author?.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredBooks = books.filter((b) => b.title?.toLowerCase().includes(search.toLowerCase()) || b.author?.toLowerCase().includes(search.toLowerCase()));
 
-  // เปิด Modal เพิ่มหนังสือ
   const handleOpenAddModal = () => {
     setEditingId(null);
     setTitle('');
@@ -66,12 +59,8 @@ function ManageBooks() {
     setIsModalOpen(true);
   };
 
-  // เปิด Modal แก้ไขหนังสือ
   const handleOpenEditModal = (book) => {
-    const currentCat = Array.isArray(book.categories) && book.categories.length > 0
-      ? book.categories[0]
-      : (book.category || 'Fantasy');
-
+    const currentCat = Array.isArray(book.categories) && book.categories.length > 0 ? book.categories[0] : (book.category || 'Fantasy');
     setEditingId(book.id);
     setTitle(book.title || '');
     setAuthor(book.author || '');
@@ -86,42 +75,21 @@ function ManageBooks() {
     e.preventDefault();
     setIsSaving(true);
 
-    const payload = {
-      title,
-      author,
-      category,
-      categories: [category],
-      cover_url: coverUrl,
-      description,
-    };
+    const payload = { title, author, category, categories: [category], cover_url: coverUrl, description,};
 
     try {
       if (editingId) {
-        // แก้ไขหนังสือเดิม
         try {
-          await apiRequest(`/api/admin/books/${editingId}`, {
-            method: 'PUT',
-            body: JSON.stringify(payload),
-          });
+          await apiRequest(`/api/admin/books/${editingId}`, { method: 'PUT', body: JSON.stringify(payload)});
         } catch {
-          await apiRequest(`/api/books/${editingId}`, {
-            method: 'PUT',
-            body: JSON.stringify(payload),
-          });
+          await apiRequest(`/api/books/${editingId}`, { method: 'PUT', body: JSON.stringify(payload)});
         }
         alert('อัปเดตข้อมูลหนังสือเรียบร้อยแล้วค่ะ');
       } else {
-        // เพิ่มหนังสือใหม่
         try {
-          await apiRequest('/api/admin/books', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-          });
+          await apiRequest('/api/admin/books', { method: 'POST', body: JSON.stringify(payload)});
         } catch {
-          await apiRequest('/api/books', {
-            method: 'POST',
-            body: JSON.stringify(payload),
-          });
+          await apiRequest('/api/books', { method: 'POST', body: JSON.stringify(payload)});
         }
         alert('เพิ่มหนังสือใหม่เข้าสู่ระบบเรียบร้อยแล้วค่ะ');
       }
@@ -155,11 +123,9 @@ function ManageBooks() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#2D2A26] flex flex-col justify-between font-sans">
       <Navbar />
-
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 sm:px-8 py-10 space-y-6">
         <div>
-          <button
-            onClick={() => navigate('/admin')}
+          <button onClick={() => navigate('/admin')}
             className="text-xs font-medium text-[#7A756E] hover:text-[#1E1C1A] transition inline-flex items-center gap-1">
             <span>กลับไปหน้า Admin Dashboard</span>
           </button>
@@ -171,21 +137,15 @@ function ManageBooks() {
             <p className="text-xs sm:text-sm text-[#7A756E]">เพิ่ม แก้ไข และลบรายการหนังสือทั้งหมด ({books.length} เล่ม)</p>
           </div>
 
-          <button
-            onClick={handleOpenAddModal}
+          <button onClick={handleOpenAddModal}
             className="px-6 py-3 bg-[#232129] hover:bg-[#36333F] text-white rounded-xl text-xs sm:text-sm font-medium shadow-sm flex items-center gap-2 self-start sm:self-auto transition">
             <span>+ เพิ่มหนังสือใหม่</span>
           </button>
         </div>
 
         <div className="bg-[#F3EFE8]/80 p-4 rounded-2xl border border-[#E6E0D6]">
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="ค้นหาชื่อหนังสือ หรือ ชื่อผู้แต่ง..."
-            className="w-full px-4 py-2.5 bg-white border border-[#E6E0D6] rounded-xl text-xs text-[#1E1C1A] placeholder-[#9C968E] focus:outline-none focus:ring-1 focus:ring-[#232129]"
-          />
+          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ค้นหาชื่อหนังสือ หรือ ชื่อผู้แต่ง..."
+            className="w-full px-4 py-2.5 bg-white border border-[#E6E0D6] rounded-xl text-xs text-[#1E1C1A] placeholder-[#9C968E] focus:outline-none focus:ring-1 focus:ring-[#232129]"/>
         </div>
 
         <div className="bg-white rounded-2xl border border-[#E6E0D6] shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-x-auto">
@@ -204,9 +164,7 @@ function ManageBooks() {
               <tbody className="divide-y divide-[#F3EFE8]">
                 {filteredBooks.length > 0 ? (
                   filteredBooks.map((b) => {
-                    const displayCat = Array.isArray(b.categories) && b.categories.length > 0
-                      ? b.categories.join(', ')
-                      : (b.category || 'ทั่วไป');
+                    const displayCat = Array.isArray(b.categories) && b.categories.length > 0 ? b.categories.join(', ') : (b.category || 'ทั่วไป');
 
                     return (
                       <tr key={b.id} className="hover:bg-[#FAF7F2] transition">
@@ -224,11 +182,9 @@ function ManageBooks() {
                         </td>
                         <td className="p-4 text-center">
                           <div className="flex items-center justify-center gap-2">
-                            <button
-                              onClick={() => handleOpenEditModal(b)}
+                            <button onClick={() => handleOpenEditModal(b)}
                               className="px-3.5 py-1.5 bg-[#F3EFE8] text-[#1E1C1A] border border-[#E6E0D6] rounded-lg text-[11px] font-medium hover:bg-[#E6E0D6] transition">แก้ไข</button>
-                            <button
-                              onClick={() => handleDeleteBook(b.id, b.title)}
+                            <button onClick={() => handleDeleteBook(b.id, b.title)}
                               className="px-3.5 py-1.5 bg-rose-50 text-rose-600 border border-rose-200 rounded-lg text-[11px] font-medium hover:bg-rose-100 transition">ลบ</button>
                           </div>
                         </td>
@@ -236,9 +192,7 @@ function ManageBooks() {
                     );
                   })
                 ) : (
-                  <tr>
-                    <td colSpan="4" className="text-center py-10 text-[#7A756E]">ไม่พบรายการหนังสือที่คุณค้นหา</td>
-                  </tr>
+                  <tr><td colSpan="4" className="text-center py-10 text-[#7A756E]">ไม่พบรายการหนังสือที่คุณค้นหา</td></tr>
                 )}
               </tbody>
             </table>
@@ -266,23 +220,15 @@ function ManageBooks() {
 
               <div>
                 <label className="block mb-1 font-medium text-[#1E1C1A]">หมวดหมู่ *</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
+                <select value={category} onChange={(e) => setCategory(e.target.value)}
                   className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]">
-                  {categoryOptions.map((cat) => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
+                  {categoryOptions.map((cat) => (<option key={cat} value={cat}>{cat}</option>))}
                 </select>
               </div>
 
               <div>
                 <label className="block mb-1 font-medium text-[#1E1C1A]">เรื่องย่อ</label>
-                <textarea
-                  rows="3"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="กรอกรายละเอียดหรือเรื่องย่อของหนังสือ..."
+                <textarea rows="3" value={description} onChange={(e) => setDescription(e.target.value)} placeholder="กรอกรายละเอียดหรือเรื่องย่อของหนังสือ..."
                   className="w-full p-2.5 bg-[#FAF7F2] border border-[#E6E0D6] rounded-xl text-[#1E1C1A] focus:outline-none focus:ring-1 focus:ring-[#232129]"/>
               </div>
 
@@ -296,7 +242,6 @@ function ManageBooks() {
           </div>
         </div>
       )}
-
       <Footer />
     </div>
   );

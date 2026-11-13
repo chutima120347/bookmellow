@@ -8,14 +8,13 @@ import { ErrorBox, Loading, ConfirmBox, inputClass } from '../../components/admi
 
 const dateTH = (iso) => new Date(iso).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
 
-// รายชื่อสมาชิก + ปุ่มเลื่อน/ลดบทบาท (ของตัวเองกดไม่ได้)
 function AdminMembers() {
   const { token, user: me } = useAuth();
   const [members, setMembers] = useState([]);
   const [status, setStatus] = useState('loading');
   const [error, setError] = useState(null);
   const [query, setQuery] = useState('');
-  const [target, setTarget] = useState(null);      // สมาชิกที่กำลังจะเปลี่ยนบทบาท (เปิดกล่องยืนยัน)
+  const [target, setTarget] = useState(null); 
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [reloadKey, setReloadKey] = useState(0);
@@ -63,29 +62,19 @@ function AdminMembers() {
   return (
     <div className="min-h-screen bg-[#FAF7F2] text-[#4A2B1D] flex flex-col justify-between font-sans">
       <Navbar />
-
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-4">
-          <Link to="/admin" className="text-xs font-semibold text-[#8C533A] hover:underline">
-            ← กลับไปหน้า Admin Dashboard
-          </Link>
+          <Link to="/admin" className="text-xs font-semibold text-[#8C533A] hover:underline">กลับไปหน้า Admin Dashboard</Link>
         </div>
 
         <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <h2 className="text-lg font-semibold text-[#1E1C1A]">สมาชิก</h2>
             {status === 'success' && (
-              <p className="text-sm text-[#7A756E]">
-                ทั้งหมด {members.length} คน (admin {members.filter(m => m.role === 'admin' || m.isAdmin === true).length})
-              </p>
+              <p className="text-sm text-[#7A756E]">ทั้งหมด {members.length} คน (admin {members.filter(m => m.role === 'admin' || m.isAdmin === true).length})</p>
             )}
           </div>
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="ค้นชื่อหรืออีเมล"
-            className={inputClass + ' md:w-64'}
-          />
+          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ค้นชื่อหรืออีเมล" className={inputClass + ' md:w-64'}/>
         </div>
 
         {actionError && <p className="mb-3 text-sm text-rose-600">{actionError}</p>}
@@ -109,25 +98,18 @@ function AdminMembers() {
                   return (
                     <tr key={m.id} className="hover:bg-[#FAF7F2]">
                       <td className="px-4 py-2">
-                        <p className="font-medium text-[#1E1C1A]">
-                          {m.displayName || m.username} {isMe && <span className="text-xs text-[#8C7B70]">(คุณ)</span>}
-                        </p>
+                        <p className="font-medium text-[#1E1C1A]"> {m.displayName || m.username} {isMe && <span className="text-xs text-[#8C7B70]">(คุณ)</span>}</p>
                         <p className="text-xs text-[#7A756E]">{m.email}</p>
                       </td>
                       <td className="px-4 py-2">
-                        <span className={'rounded-full px-2 py-0.5 text-xs ' + (isMemberAdmin ? 'bg-[#4A2B1D] text-[#FDFBF7]' : 'bg-[#F3EFE8] text-[#7A756E]')}>
-                          {isMemberAdmin ? 'admin' : 'member'}
-                        </span>
+                        <span className={'rounded-full px-2 py-0.5 text-xs ' + (isMemberAdmin ? 'bg-[#4A2B1D] text-[#FDFBF7]' : 'bg-[#F3EFE8] text-[#7A756E]')}> {isMemberAdmin ? 'admin' : 'member'}</span>
                       </td>
                       <td className="px-4 py-2 text-[#7A756E]">
                         {(m.createdAt || m.created_at) ? dateTH(m.createdAt || m.created_at) : '-'}
                       </td>
                       <td className="px-4 py-2 text-right">
-                        <button
-                          onClick={() => setTarget(m)}
-                          disabled={isMe}
-                          className="text-[#8C533A] hover:underline disabled:cursor-not-allowed disabled:text-gray-300"
-                        >
+                        <button onClick={() => setTarget(m)} disabled={isMe}
+                          className="text-[#8C533A] hover:underline disabled:cursor-not-allowed disabled:text-gray-300">
                           {isMemberAdmin ? 'ลดเป็น member' : 'เลื่อนเป็น admin'}
                         </button>
                       </td>
@@ -143,13 +125,9 @@ function AdminMembers() {
         )}
 
         <ConfirmBox
-          open={Boolean(target)}
-          busy={busy}
+          open={Boolean(target)} busy={busy}
           title={targetIsAdmin ? `ลด ${target?.displayName || target?.username} เป็น member ?` : `เลื่อน ${target?.displayName || target?.username} เป็น admin ?`}
-          confirmText="ยืนยัน"
-          onConfirm={confirmRole}
-          onCancel={() => setTarget(null)}
-        >
+          confirmText="ยืนยัน" onConfirm={confirmRole} onCancel={() => setTarget(null)}>
           <p>
             {targetIsAdmin
               ? 'คนนี้จะเข้าหลังบ้านไม่ได้อีกเมื่อ login ใหม่ (ตั๋วใบที่ถืออยู่ยังใช้ได้จนหมดอายุภายใน 1 ชั่วโมง)'
@@ -157,10 +135,8 @@ function AdminMembers() {
           </p>
         </ConfirmBox>
       </main>
-
       <Footer />
     </div>
   );
 }
-
 export default AdminMembers;
