@@ -78,7 +78,6 @@ function Register() {
 
       <main className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md bg-[#FAF8F5] rounded-3xl p-8 sm:p-10 border border-[#E6DFD3] shadow-sm space-y-6">
-          {/* Header */}
           <div className="text-center space-y-1.5">
             <p className="text-[11px] font-semibold tracking-[0.2em] text-[#8C7A6B] uppercase">
               JOIN BOOKMELLOW
@@ -89,7 +88,6 @@ function Register() {
             </p>
           </div>
 
-          {/* Alert Message */}
           {statusMsg.text && (
             <div
               className={`rounded-2xl px-4 py-3 text-xs leading-relaxed border ${
@@ -102,7 +100,6 @@ function Register() {
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleRegister} className="space-y-4 text-xs">
             <div className="space-y-1.5">
               <label className="block font-semibold text-[#3B2A22]">ชื่อผู้ใช้</label>
@@ -150,7 +147,6 @@ function Register() {
             </button>
           </form>
 
-          {/* Footer Links */}
           <div className="text-center text-xs text-[#6E6259] space-y-3 pt-1">
             <p>
               มีบัญชีอยู่แล้ว?{' '}

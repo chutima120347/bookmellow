@@ -1,12 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { apiRequest } from '../services/api';
 
 function ResetPassword() {
-  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const token = searchParams.get('token') || '';
 
   const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -14,7 +12,8 @@ function ResetPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
-  const isValidRealEmail = (value) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
+  const isValidRealEmail = (value) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
 
   const handleReset = async (e) => {
     e.preventDefault();
@@ -43,8 +42,8 @@ function ResetPassword() {
         method: 'POST',
         body: JSON.stringify({
           email: trimmedEmail,
-          token,
           newPassword,
+          password: newPassword,
         }),
       });
 
