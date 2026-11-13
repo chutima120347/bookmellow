@@ -43,8 +43,9 @@ function ResetPassword() {
         body: JSON.stringify({
           email: trimmedEmail,
           newPassword,
+          new_password: newPassword,
           password: newPassword,
-        }),
+        })
       });
 
       setStatusMsg({
