@@ -131,53 +131,34 @@ function Login() {
 
           <form onSubmit={handleSubmit} className="space-y-4 text-xs">
             <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">อีเมล (Email)</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@gmail.com"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                required
-              />
+              <label className="font-semibold block text-[#4A2B1D]">อีเมล</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]" required/>
             </div>
 
             {!isForgotMode && (
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
-                  <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน (Password)</label>
+                  <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน</label>
                   <button
                     type="button"
                     onClick={() => {
                       setIsForgotMode(true);
                       setStatusMsg({ type: '', text: '' });
                     }}
-                    className="text-[11px] font-semibold text-[#8C533A] hover:underline"
-                  >
-                    ลืมรหัสผ่าน?
-                  </button>
+                    className="text-[11px] font-semibold text-[#8C533A] hover:underline">ลืมรหัสผ่าน?</button>
                 </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                  required
-                />
+                <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน"
+                  className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]" required/>
               </div>
             )}
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2"
-            >
+              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2">
               {isLoading
-                ? 'กำลังดำเนินการ...'
-                : isForgotMode
-                ? 'ส่งลิงก์รีเซ็ตรหัสผ่าน'
-                : 'เข้าสู่ระบบ'}
+                ? 'กำลังดำเนินการ...' : isForgotMode ? 'ส่งลิงก์รีเซ็ตรหัสผ่าน' : 'เข้าสู่ระบบ'}
             </button>
           </form>
 
@@ -191,18 +172,11 @@ function Login() {
                     setIsForgotMode(false);
                     setStatusMsg({ type: '', text: '' });
                   }}
-                  className="text-[#8C533A] font-bold hover:underline"
-                >
-                  กลับไปหน้าเข้าสู่ระบบ
+                  className="text-[#8C533A] font-bold hover:underline">กลับไปหน้าเข้าสู่ระบบ
                 </button>
               </p>
             ) : (
-              <p>
-                ยังไม่มีบัญชีผู้ใช้ใช่ไหม?{' '}
-                <Link to="/register" className="text-[#8C533A] font-bold hover:underline">
-                  สมัครสมาชิกที่นี่
-                </Link>
-              </p>
+              <p>ยังไม่มีบัญชีผู้ใช้ใช่ไหม? <Link to="/register" className="text-[#8C533A] font-bold hover:underline">สมัครสมาชิกที่นี่</Link></p>
             )}
           </div>
         </div>
@@ -214,5 +188,4 @@ function Login() {
     </div>
   );
 }
-
 export default Login;

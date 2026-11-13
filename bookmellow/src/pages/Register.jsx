@@ -97,8 +97,11 @@ function Register() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-4 text-xs">
+            <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน</label>
             <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="ชื่อผู้ใช้งาน" required className={input}/>
+            <label className="font-semibold block text-[#4A2B1D]">อีเมล</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล" required className={input}/>
+            <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน" required minLength={4} className={input}/>
             <button type="submit" disabled={isLoading}
               className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2">
