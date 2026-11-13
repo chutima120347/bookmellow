@@ -11,14 +11,15 @@ function Register() {
 
   const navigate = useNavigate();
 
-  const isValidRealEmail = (value) =>/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
+  const isValidRealEmail = (value) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
 
   const handleRegister = async (e) => {
     e.preventDefault();
     setStatusMsg({ type: '', text: '' });
 
     const trimmedUsername = username.trim();
-    const trimmedEmail = email.trim();
+    const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedUsername) {
       setStatusMsg({ type: 'error', text: 'กรุณากรอกชื่อผู้ใช้งาน' });
@@ -30,6 +31,11 @@ function Register() {
         type: 'error',
         text: 'กรุณากรอกอีเมลจริงที่ใช้งานได้ เพื่อรองรับการรีเซ็ตรหัสผ่าน',
       });
+      return;
+    }
+
+    if (password.length < 8) {
+      setStatusMsg({ type: 'error', text: 'รหัสผ่านต้องมีความยาวอย่างน้อย 8 ตัวอักษร' });
       return;
     }
 
@@ -73,7 +79,7 @@ function Register() {
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
         >
-          📚 <span>BookMellow</span>
+          <span>BookMellow</span>
         </button>
       </div>
 
@@ -81,7 +87,9 @@ function Register() {
         <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-[#4A2B1D]">สมัครสมาชิกใหม่</h1>
-            <p className="text-xs text-gray-500 leading-relaxed">กรุณาใช้อีเมลจริงที่ใช้งานได้ เพื่อรองรับการยืนยันบัญชีและส่งลิงก์รีเซ็ตรหัสผ่าน</p>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              มาเริ่มต้นค้นพบหนังสือเล่มโปรดไปด้วยกัน
+            </p>
           </div>
 
           {statusMsg.text && (
@@ -97,20 +105,58 @@ function Register() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-4 text-xs">
-            <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน</label>
-            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="ชื่อผู้ใช้งาน" required className={input}/>
-            <label className="font-semibold block text-[#4A2B1D]">อีเมล</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล" required className={input}/>
-            <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน" required minLength={4} className={input}/>
-            <button type="submit" disabled={isLoading}
-              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2">
+            <div className="space-y-1.5">
+              <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="ชื่อผู้ใช้งาน"
+                required
+                className={input}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold block text-[#4A2B1D]">อีเมล</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="example@email.com"
+                required
+                className={input}
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="อย่างน้อย 8 ตัวอักษร"
+                required
+                minLength={8}
+                className={input}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2"
+            >
               {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
             </button>
           </form>
 
           <div className="text-center text-xs text-gray-500 pt-2 border-t border-[#F4EFE6]">
-            <p>มีบัญชีแล้ว? <Link to="/login" className="text-[#8C533A] font-bold hover:underline">เข้าสู่ระบบ</Link>
+            <p>
+              มีบัญชีแล้ว?{' '}
+              <Link to="/login" className="text-[#8C533A] font-bold hover:underline">
+                เข้าสู่ระบบ
+              </Link>
             </p>
           </div>
         </div>
@@ -122,4 +168,5 @@ function Register() {
     </div>
   );
 }
+
 export default Register;

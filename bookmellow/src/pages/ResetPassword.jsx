@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 import { apiRequest } from '../services/api';
 
 function ResetPassword() {
@@ -7,30 +8,32 @@ function ResetPassword() {
   const navigate = useNavigate();
   const token = searchParams.get('token') || '';
 
+  const [email, setEmail] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
+  const isValidRealEmail = (value) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
+
   const handleReset = async (e) => {
     e.preventDefault();
     setStatusMsg({ type: '', text: '' });
 
-    if (!token) {
-      setStatusMsg({
-        type: 'error',
-        text: 'ลิงก์รีเซ็ตรหัสผ่านไม่ถูกต้องหรือหมดอายุ กรุณาขอลิงก์ใหม่อีกครั้ง',
-      });
+    const trimmedEmail = email.trim().toLowerCase();
+
+    if (!isValidRealEmail(trimmedEmail)) {
+      setStatusMsg({ type: 'error', text: 'กรุณากรอกอีเมลสมาชิกให้ถูกต้อง' });
       return;
     }
 
-    if (newPassword.length < 4) {
-      setStatusMsg({ type: 'error', text: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
+    if (newPassword.length < 8) {
+      setStatusMsg({ type: 'error', text: 'รหัสผ่านใหม่ต้องมีอย่างน้อย 8 ตัวอักษร' });
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setStatusMsg({ type: 'error', text: 'รหัสผ่านใหม่และยืนยันรหัสผ่านไม่ตรงกัน' });
+      setStatusMsg({ type: 'error', text: 'รหัสผ่านใหม่และยืนยันรหัสผ่านใหม่ไม่ตรงกัน' });
       return;
     }
 
@@ -38,21 +41,25 @@ function ResetPassword() {
       setIsLoading(true);
       await apiRequest('/api/auth/reset-password', {
         method: 'POST',
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({
+          email: trimmedEmail,
+          token,
+          newPassword,
+        }),
       });
 
       setStatusMsg({
         type: 'success',
-        text: 'เปลี่ยนรหัสผ่านสำเร็จแล้ว! กำลังพาคุณไปหน้าเข้าสู่ระบบ...',
+        text: 'บันทึกรหัสผ่านใหม่เรียบร้อยแล้ว! กำลังพาคุณไปหน้าเข้าสู่ระบบ...',
       });
 
       setTimeout(() => {
         navigate('/login', { replace: true });
-      }, 2000);
+      }, 1500);
     } catch (err) {
       setStatusMsg({
         type: 'error',
-        text: err.message || 'ลิงก์หมดอายุหรือไม่ถูกต้อง กรุณาขอลิงก์รีเซ็ตรหัสผ่านใหม่',
+        text: err.message || 'ไม่สามารถเปลี่ยนรหัสผ่านได้ กรุณาตรวจสอบอีเมลสมาชิกอีกครั้ง',
       });
     } finally {
       setIsLoading(false);
@@ -60,23 +67,18 @@ function ResetPassword() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
-      <div className="max-w-7xl mx-auto w-full pt-4">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
-        >
-          <span>BookMellow</span>
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#F5F2EB] text-[#3B2A22] flex flex-col">
+      <Navbar />
 
-      <div className="flex-1 flex items-center justify-center py-8">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-[#4A2B1D]">ตั้งรหัสผ่านใหม่</h1>
-            <p className="text-xs text-gray-500">
-              กรอกรหัสผ่านใหม่ที่ต้องการใช้งานสำหรับบัญชี BookMellow ของคุณ
+      <main className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md bg-[#FAF8F5] rounded-3xl p-8 sm:p-10 border border-[#E6DFD3] shadow-sm space-y-6">
+          <div className="text-center space-y-1.5">
+            <p className="text-[11px] font-semibold tracking-[0.2em] text-[#8C7A6B] uppercase">
+              PASSWORD RECOVERY
+            </p>
+            <h1 className="text-2xl sm:text-3xl font-bold text-[#3B2A22]">เปลี่ยนรหัสผ่าน</h1>
+            <p className="text-xs text-[#6E6259] pt-1">
+              กรอกอีเมลสมาชิกและกำหนดรหัสผ่านใหม่ของคุณ
             </p>
           </div>
 
@@ -93,47 +95,64 @@ function ResetPassword() {
           )}
 
           <form onSubmit={handleReset} className="space-y-4 text-xs">
-            <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">รหัสผ่านใหม่</label>
+            <div className="space-y-1.5">
+              <label className="block font-semibold text-[#3B2A22]">อีเมลสมาชิก</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="example@email.com"
+                required
+                className="w-full px-4 py-3 bg-[#EFECE6] border border-[#E2DDD3] rounded-xl text-[#3B2A22] placeholder-[#9E948B] focus:outline-none focus:ring-1 focus:ring-[#7D6659]"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="block font-semibold text-[#3B2A22]">รหัสผ่านใหม่</label>
               <input
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="อย่างน้อย 4 ตัวอักษร"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                placeholder="อย่างน้อย 8 ตัวอักษร"
+                minLength={8}
                 required
+                className="w-full px-4 py-3 bg-[#EFECE6] border border-[#E2DDD3] rounded-xl text-[#3B2A22] placeholder-[#9E948B] focus:outline-none focus:ring-1 focus:ring-[#7D6659]"
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">ยืนยันรหัสผ่านใหม่</label>
+            <div className="space-y-1.5">
+              <label className="block font-semibold text-[#3B2A22]">ยืนยันรหัสผ่านใหม่</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="กรอกรหัสผ่านใหม่อีกครั้ง"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                minLength={8}
                 required
+                className="w-full px-4 py-3 bg-[#EFECE6] border border-[#E2DDD3] rounded-xl text-[#3B2A22] placeholder-[#9E948B] focus:outline-none focus:ring-1 focus:ring-[#7D6659]"
               />
             </div>
 
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50"
+              className="w-full py-3.5 mt-2 bg-[#7D6659] hover:bg-[#634F44] text-white rounded-full font-bold text-sm shadow-sm transition disabled:opacity-50"
             >
               {isLoading ? 'กำลังบันทึก...' : 'บันทึกรหัสผ่านใหม่'}
             </button>
           </form>
 
-          <div className="text-center text-xs text-gray-500 pt-2 border-t border-[#F4EFE6]">
-            <Link to="/login" className="text-[#8C533A] font-bold hover:underline">
-              กลับไปหน้าเข้าสู่ระบบ
+          <div className="text-center pt-1">
+            <Link
+              to="/login"
+              className="inline-flex items-center gap-1.5 text-xs text-[#7D6659] hover:text-[#3B2A22] font-medium transition"
+            >
+              <span>←</span>
+              <span>กลับไปหน้าเข้าสู่ระบบ</span>
             </Link>
           </div>
         </div>
-      </div>
-
+      </main>
       <footer className="text-center text-[11px] text-gray-400 py-4">
         © 2026 BookMellow Web Application. All rights reserved.
       </footer>
