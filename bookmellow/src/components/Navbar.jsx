@@ -9,6 +9,10 @@ function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  const isAdmin = user?.role === 'admin' || user?.isAdmin === true;
+  const displayName = user?.displayName || user?.username || 'นักอ่าน';
+  const userInitial = displayName.charAt(0).toUpperCase();
+
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
@@ -23,10 +27,6 @@ function Navbar() {
     logout();
     navigate('/auth');
   };
-
-  const userInitial = user?.displayName
-    ? user.displayName.charAt(0).toUpperCase()
-    : 'U';
 
   return (
     <header className="sticky top-0 z-40 bg-[#4A2B1D] text-[#FDFBF7] shadow-md border-b border-[#633A27]">
@@ -76,7 +76,7 @@ function Navbar() {
                 รายการโปรด
               </button>
             )}
-            {isLoggedIn && user?.isAdmin && (
+            {isLoggedIn && isAdmin && (
               <button
                 onClick={() => navigate('/admin')}
                 className={`transition hover:text-[#E8DCC4] ${
@@ -104,14 +104,15 @@ function Navbar() {
               <button
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                 title="ข้อมูลส่วนตัว"
-                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition">
+                className="w-9 h-9 rounded-full bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/50 flex items-center justify-center text-xs font-bold text-[#FDFBF7] shadow-sm transition"
+              >
                 {userInitial}
               </button>
 
               {isDropdownOpen && (
                 <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-lg border border-[#E8DCC4] py-2 text-xs text-[#4A2B1D] z-50">
                   <div className="px-4 py-2 border-b border-[#F4EFE6]">
-                    <p className="font-bold truncate">{user?.displayName || 'นักอ่าน'}</p>
+                    <p className="font-bold truncate">{displayName}</p>
                     <p className="text-[10px] text-gray-400 truncate">{user?.email}</p>
                   </div>
 
@@ -120,18 +121,20 @@ function Navbar() {
                       setIsDropdownOpen(false);
                       navigate('/profile');
                     }}
-                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2">
-                      โปรไฟล์ของฉัน
+                    className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] transition flex items-center gap-2"
+                  >
+                    โปรไฟล์ของฉัน
                   </button>
 
-                  {user?.isAdmin && (
+                  {isAdmin && (
                     <button
                       onClick={() => {
                         setIsDropdownOpen(false);
                         navigate('/admin');
                       }}
                       className="w-full text-left px-4 py-2 hover:bg-[#F4EFE6] text-[#8C533A] font-semibold transition flex items-center gap-2"
-                    >แดชบอร์ด
+                    >
+                      แดชบอร์ด
                     </button>
                   )}
 
@@ -139,7 +142,8 @@ function Navbar() {
                     <button
                       onClick={handleLogout}
                       className="w-full text-left px-4 py-2 text-rose-600 hover:bg-rose-50 font-semibold transition flex items-center gap-2"
-                    >ออกจากระบบ
+                    >
+                      ออกจากระบบ
                     </button>
                   </div>
                 </div>
@@ -148,7 +152,8 @@ function Navbar() {
           ) : (
             <button
               onClick={() => navigate('/auth')}
-              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0">
+              className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0"
+            >
               เข้าสู่ระบบ
             </button>
           )}
@@ -157,4 +162,5 @@ function Navbar() {
     </header>
   );
 }
+
 export default Navbar;

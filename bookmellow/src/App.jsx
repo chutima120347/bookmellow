@@ -1,7 +1,5 @@
-import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './auth/AuthContext';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './auth/AuthContext';
 import Home from './pages/Home';
 import Explore from './pages/Explore';
 import BookDetail from './pages/BookDetail';
@@ -13,45 +11,7 @@ import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageBooks from './pages/ManageBooks';
 import AdminMembers from './pages/admin/AdminMembers';
-
-function Forbidden403() {
-  const navigate = useNavigate();
-
-  return (
-    <div className="min-h-screen bg-[#FAF7F2] text-[#4A2B1D] flex flex-col justify-between font-sans">
-      <Navbar />
-      <main className="flex-1 flex flex-col items-center justify-center px-4 text-center space-y-4">
-        <div className="text-6xl font-extrabold text-[#8C533A]">403</div>
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#1E1C1A]">
-          ไม่มีสิทธิ์เข้าถึง
-        </h1>
-        <p className="text-xs sm:text-sm text-[#7A756E] max-w-md">
-          ขออภัย หน้านี้สงวนสิทธิ์ไว้สำหรับผู้ดูแลระบบ (Admin) เท่านั้น คุณไม่มีสิทธิ์เข้าถึงเนื้อหาในส่วนนี้
-        </p>
-        <div className="pt-2">
-          <button
-            onClick={() => navigate('/')}
-            className="px-6 py-2.5 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-full text-xs sm:text-sm font-semibold transition shadow-sm"
-          >
-            กลับสู่หน้าหลัก
-          </button>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
-}
-
-function AdminRoute({ children }) {
-  const { user, isLoggedIn, isLoading } = useAuth();
-
-  if (isLoading) return null;
-  if (!isLoggedIn || !user?.isAdmin) {
-    return <Forbidden403 />;
-  }
-
-  return children;
-}
+import RequireRole from './components/RequireRole';
 
 function App() {
   return (
@@ -71,25 +31,25 @@ function App() {
           <Route
             path="/admin"
             element={
-              <AdminRoute>
+              <RequireRole role="admin">
                 <AdminDashboard />
-              </AdminRoute>
+              </RequireRole>
             }
           />
           <Route
             path="/admin/manage-books"
             element={
-              <AdminRoute>
+              <RequireRole role="admin">
                 <ManageBooks />
-              </AdminRoute>
+              </RequireRole>
             }
           />
           <Route
             path="/admin/members"
             element={
-              <AdminRoute>
+              <RequireRole role="admin">
                 <AdminMembers />
-          </AdminRoute>
+              </RequireRole>
             }
           />
         </Routes>
@@ -97,4 +57,5 @@ function App() {
     </AuthProvider>
   );
 }
+
 export default App;

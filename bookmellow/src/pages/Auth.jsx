@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../services/api';
 
@@ -11,7 +11,9 @@ function Auth() {
   const [isLoading, setIsLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  const from = location.state?.from || '/';
 
   // ฟังก์ชันจัดการยิง API ทั้ง Login และ Register
   const handleSubmit = async (e) => {
@@ -41,16 +43,22 @@ function Auth() {
 
         // ดึงข้อมูล User จาก Backend มาเก็บใน AuthContext
         const userData = data.user || data.data?.user || {};
-        login({
-          id: userData.id || userData._id,
-          displayName: userData.username || userData.name || email.split('@')[0],
-          email: userData.email || email,
-          isAdmin: userData.role === 'admin' || userData.isAdmin || false,
-        });
+        const isAdmin = userData.role === 'admin' || userData.isAdmin === true;
+
+        login(
+          {
+            id: userData.id || userData._id,
+            displayName: userData.displayName || userData.username || userData.name || email.split('@')[0],
+            username: userData.username || userData.displayName || email.split('@')[0],
+            email: userData.email || email,
+            role: userData.role || (isAdmin ? 'admin' : 'member'),
+            isAdmin,
+          },
+          token
+        );
 
         alert('เข้าสู่ระบบสำเร็จแล้วค่ะ!');
-        navigate('/');
-
+        navigate(from, { replace: true });
       } else {
         // -------------------------------------------------------------
         // 2. กรณี: สมัครสมาชิก (POST /api/auth/register)
@@ -80,8 +88,8 @@ function Auth() {
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
       {/* Header Logo */}
       <div className="max-w-7xl mx-auto w-full pt-4">
-        <button 
-          onClick={() => navigate('/')} 
+        <button
+          onClick={() => navigate('/')}
           className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
         >
           📚 <span>BookMellow</span>
@@ -91,13 +99,14 @@ function Auth() {
       {/* Main Content */}
       <div className="flex-1 flex items-center justify-center py-8">
         <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
-          
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-[#4A2B1D]">
               {isLoginTab ? 'เข้าสู่ระบบ BookMellow' : 'สมัครสมาชิกใหม่'}
             </h1>
             <p className="text-xs text-gray-500">
-              {isLoginTab ? 'กรอกข้อมูลเพื่อเข้าสู่ระบบ' : 'สร้างบัญชีผู้ใช้เพื่อเริ่มต้นใช้งานคลังหนังสือสุดอบอุ่น'}
+              {isLoginTab
+                ? 'กรอกข้อมูลเพื่อเข้าสู่ระบบ'
+                : 'สร้างบัญชีผู้ใช้เพื่อเริ่มต้นใช้งานคลังหนังสือสุดอบอุ่น'}
             </p>
           </div>
 
@@ -177,14 +186,22 @@ function Auth() {
             {isLoginTab ? (
               <p>
                 ยังไม่มีบัญชีผู้ใช้ใช่ไหม?{' '}
-                <button type="button" onClick={() => setIsLoginTab(false)} className="text-[#8C533A] font-bold hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setIsLoginTab(false)}
+                  className="text-[#8C533A] font-bold hover:underline"
+                >
                   สมัครสมาชิกที่นี่
                 </button>
               </p>
             ) : (
               <p>
                 มีบัญชีผู้ใช้อยู่อุปกรณ์แล้ว?{' '}
-                <button type="button" onClick={() => setIsLoginTab(true)} className="text-[#8C533A] font-bold hover:underline">
+                <button
+                  type="button"
+                  onClick={() => setIsLoginTab(true)}
+                  className="text-[#8C533A] font-bold hover:underline"
+                >
                   เข้าสู่ระบบที่นี่
                 </button>
               </p>
@@ -199,4 +216,5 @@ function Auth() {
     </div>
   );
 }
+
 export default Auth;
