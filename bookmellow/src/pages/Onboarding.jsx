@@ -6,9 +6,9 @@ import { useAuth } from '../auth/AuthContext';
 import { apiRequest } from '../services/api';
 
 const interestCategories = [
-  'Adventure', 'Biography', 'Children', 'Education', 'Fantasy',
-  'Horror', 'Mystery', 'Romance', 'Science Fiction', 'Self-Help', 
-  'Thriller', 'Young Adult', 'Children', 'Poetry', 'Adventure'];
+  'Fantasy', 'Romance', 'Mystery', 'Science Fiction', 'Thriller',
+  'Horror', 'Historical Fiction', 'Self-Help', 'Business', 'Education', 
+  'Biography', 'Young Adult', 'Children', 'Poetry', 'Adventure'];
 
 function Onboarding() {
   const navigate = useNavigate();
