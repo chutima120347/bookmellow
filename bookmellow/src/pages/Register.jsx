@@ -6,7 +6,6 @@ function Register() {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
 
@@ -29,18 +28,8 @@ function Register() {
     if (!isValidRealEmail(trimmedEmail)) {
       setStatusMsg({
         type: 'error',
-        text: 'กรุณากรอกอีเมลจริงที่ใช้งานได้ (เช่น name@gmail.com) เพื่อรองรับการรีเซ็ตรหัสผ่าน',
+        text: 'กรุณากรอกอีเมลจริงที่ใช้งานได้ เพื่อรองรับการรีเซ็ตรหัสผ่าน',
       });
-      return;
-    }
-
-    if (password.length < 6) {
-      setStatusMsg({ type: 'error', text: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setStatusMsg({ type: 'error', text: 'รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน' });
       return;
     }
 
@@ -73,10 +62,14 @@ function Register() {
     }
   };
 
+  const input =
+    'w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]';
+
   return (
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
       <div className="max-w-7xl mx-auto w-full pt-4">
         <button
+          type="button"
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
         >
@@ -88,9 +81,7 @@ function Register() {
         <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-[#4A2B1D]">สมัครสมาชิกใหม่</h1>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              กรุณาใช้อีเมลจริงที่ใช้งานได้ เพื่อรองรับการยืนยันบัญชีและส่งลิงก์รีเซ็ตรหัสผ่าน
-            </p>
+            <p className="text-xs text-gray-500 leading-relaxed">กรุณาใช้อีเมลจริงที่ใช้งานได้ เพื่อรองรับการยืนยันบัญชีและส่งลิงก์รีเซ็ตรหัสผ่าน</p>
           </div>
 
           {statusMsg.text && (
@@ -106,69 +97,17 @@ function Register() {
           )}
 
           <form onSubmit={handleRegister} className="space-y-4 text-xs">
-            <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน (Username)</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="เช่น blueii"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">อีเมลจริง (Email)</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@gmail.com"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน (Password)</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="อย่างน้อย 6 ตัวอักษร"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                required
-              />
-            </div>
-
-            <div className="space-y-1">
-              <label className="font-semibold block text-[#4A2B1D]">ยืนยันรหัสผ่าน</label>
-              <input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="กรอกรหัสผ่านอีกครั้ง"
-                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
-                required
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2"
-            >
+            <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} placeholder="ชื่อผู้ใช้งาน" required className={input}/>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล" required className={input}/>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน" required minLength={4} className={input}/>
+            <button type="submit" disabled={isLoading}
+              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2">
               {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
             </button>
           </form>
 
           <div className="text-center text-xs text-gray-500 pt-2 border-t border-[#F4EFE6]">
-            <p>
-              มีบัญชีผู้ใช้อยู่แล้ว?{' '}
-              <Link to="/login" className="text-[#8C533A] font-bold hover:underline">
-                เข้าสู่ระบบที่นี่
-              </Link>
+            <p>มีบัญชีแล้ว? <Link to="/login" className="text-[#8C533A] font-bold hover:underline">เข้าสู่ระบบ</Link>
             </p>
           </div>
         </div>
@@ -180,5 +119,4 @@ function Register() {
     </div>
   );
 }
-
 export default Register;
