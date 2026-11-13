@@ -6,7 +6,9 @@ import BookDetail from './pages/BookDetail';
 import Profile from './pages/Profile';
 import Onboarding from './pages/Onboarding';
 import Recommendations from './pages/Recommendations';
-import Auth from './pages/Auth';
+import Login from './pages/Login';
+import Register from './pages/Register';
+import ResetPassword from './pages/ResetPassword';
 import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import ManageBooks from './pages/ManageBooks';
@@ -25,8 +27,10 @@ function App() {
           <Route path="/onboarding" element={<Onboarding />} />
           <Route path="/interests" element={<Onboarding />} />
           <Route path="/recommendations" element={<Recommendations />} />
-          <Route path="/auth" element={<Auth />} />
           <Route path="/favorites" element={<Favorites />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
 
           <Route
             path="/admin"

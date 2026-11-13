@@ -14,7 +14,7 @@ function Profile() {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      navigate('/auth');
+      navigate('/login');
       return;
     }
 
@@ -44,7 +44,7 @@ function Profile() {
 
   const handleLogout = () => {
     logout();
-    navigate('/auth');
+    navigate('/login');
   };
 
   const displayName = profile?.displayName || profile?.username || profile?.name || 'นักอ่าน BookMellow';

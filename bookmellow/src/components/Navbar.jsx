@@ -25,7 +25,7 @@ function Navbar() {
   const handleLogout = () => {
     setIsDropdownOpen(false);
     logout();
-    navigate('/auth');
+    navigate('/login');
   };
 
   return (
@@ -151,7 +151,7 @@ function Navbar() {
             </div>
           ) : (
             <button
-              onClick={() => navigate('/auth')}
+              onClick={() => navigate('/login')}
               className="px-4 py-1.5 bg-[#8C533A] hover:bg-[#633A27] border border-[#E8DCC4]/40 text-[#FDFBF7] rounded-full text-xs font-semibold transition shadow-sm flex-shrink-0"
             >
               เข้าสู่ระบบ

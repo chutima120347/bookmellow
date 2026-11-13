@@ -6,8 +6,8 @@ function RequireRole({ role, children }) {
   const location = useLocation();
 
   if (!isLoggedIn) {
-    return <Navigate to="/auth" replace state={{ from: location.pathname }} />;
-  }
+  return <Navigate to="/login" replace state={{ from: location.pathname }} />;
+}
 
   const currentRole =
     user?.role || (user?.isAdmin === true ? 'admin' : 'member');
