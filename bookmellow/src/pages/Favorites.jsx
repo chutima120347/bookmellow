@@ -52,7 +52,7 @@ function Favorites() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2">💖 <span>รายการโปรดของฉัน</span></h1>
+          <h1 className="text-2xl sm:text-3xl font-bold flex items-center gap-2"><span>รายการโปรดของฉัน</span></h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">หนังสือที่คุณบันทึกไว้ในดวงใจ ทั้งหมด {favoriteBooks.length} เล่ม</p>
         </div>
 
@@ -101,12 +101,11 @@ function Favorites() {
           </div>
         ) : (
           <div className="text-center py-16 bg-white rounded-3xl border border-pink-100 space-y-4">
-            <div className="text-4xl">🌷</div>
             <h3 className="text-base font-bold text-[#4A3E3D]">ยังไม่มีหนังสือในรายการโปรด</h3>
             <p className="text-xs text-slate-400">กดไอคอนหัวใจ 💖 บนหนังสือที่ชอบเพื่อเก็บไว้ที่นี่ได้เลยน้า</p>
             <button
               onClick={() => navigate('/explore')}
-              className="px-6 py-2.5 bg-[#FF9EAA] hover:bg-[#FF9EAA]/90 text-white text-xs font-semibold rounded-full shadow-sm transition">ไปเลือกดูหนังสือกันเลย</button>
+              className="bg-[#8C533A] hover:bg-[#4A2B1D] text-white px-6 py-3 rounded-full text-xs sm:text-sm font-semibold transition shadow-md inline-flex items-center gap-2">ไปเลือกดูหนังสือกันเลย</button>
           </div>
         )}
       </main>

@@ -24,8 +24,8 @@ function ResetPassword() {
       return;
     }
 
-    if (newPassword.length < 6) {
-      setStatusMsg({ type: 'error', text: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
+    if (newPassword.length < 4) {
+      setStatusMsg({ type: 'error', text: 'รหัสผ่านใหม่ต้องมีความยาวอย่างน้อย 4 ตัวอักษร' });
       return;
     }
 
@@ -63,6 +63,7 @@ function ResetPassword() {
     <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
       <div className="max-w-7xl mx-auto w-full pt-4">
         <button
+          type="button"
           onClick={() => navigate('/')}
           className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
         >
@@ -98,7 +99,7 @@ function ResetPassword() {
                 type="password"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="อย่างน้อย 6 ตัวอักษร"
+                placeholder="อย่างน้อย 4 ตัวอักษร"
                 className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
                 required
               />

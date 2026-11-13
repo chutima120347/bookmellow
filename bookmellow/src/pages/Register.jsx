@@ -11,7 +11,7 @@ function Register() {
 
   const navigate = useNavigate();
 
-  const isValidRealEmail = (value) => /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value.trim());
+  const isValidRealEmail = (value) =>/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
 
   const handleRegister = async (e) => {
     e.preventDefault();

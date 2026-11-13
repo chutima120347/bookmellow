@@ -15,7 +15,7 @@ function Login() {
   const { login } = useAuth();
   const from = location.state?.from || '/';
 
-  const isValidRealEmail = (value) => /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value.trim());
+  const isValidRealEmail = (value) =>/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value.trim());
 
   const handleSubmit = async (e) => {
     e.preventDefault();
