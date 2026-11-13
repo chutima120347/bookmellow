@@ -22,14 +22,14 @@ function Register() {
     const trimmedEmail = email.trim().toLowerCase();
 
     if (!trimmedUsername) {
-      setStatusMsg({ type: 'error', text: 'กรุณากรอกชื่อผู้ใช้งาน' });
+      setStatusMsg({ type: 'error', text: 'กรุณากรอกชื่อผู้ใช้' });
       return;
     }
 
     if (!isValidRealEmail(trimmedEmail)) {
       setStatusMsg({
         type: 'error',
-        text: 'กรุณากรอกอีเมลจริงที่ใช้งานได้ เพื่อรองรับการรีเซ็ตรหัสผ่าน',
+        text: 'กรุณากรอกรูปแบบอีเมลจริงที่ถูกต้อง (เช่น name@gmail.com)',
       });
       return;
     }
@@ -68,100 +68,107 @@ function Register() {
     }
   };
 
-  const input =
-    'w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]';
+  const inputClass =
+    'w-full px-4 py-3 bg-[#EFECE6] border border-[#E2DDD3] rounded-xl text-[#4A2B1D] placeholder-[#9E948B] focus:outline-none focus:ring-1 focus:ring-[#584237]';
 
   return (
-    <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
-      <div className="max-w-7xl mx-auto w-full pt-4">
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
-        >
-          <span>BookMellow</span>
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#F6F3EC] flex items-center justify-center p-4 text-[#4A2B1D]">
+      <div className="w-full max-w-[440px] bg-[#FCFBF9] rounded-3xl px-8 py-10 sm:px-10 sm:py-11 border border-[#EAE2D3] shadow-sm space-y-6">
+        {/* Header */}
+        <div className="text-center space-y-1.5">
+          <p className="text-[11px] font-semibold tracking-[0.18em] text-[#B87D4B] uppercase">
+            JOIN BOOKMELLOW
+          </p>
+          <h1 className="text-2xl sm:text-[28px] font-bold text-[#4A2B1D]">สมัครสมาชิก</h1>
+          <p className="text-xs text-[#6E6259] pt-1">
+            มาเริ่มต้นค้นพบหนังสือเล่มโปรดไปด้วยกัน
+          </p>
+        </div>
 
-      <div className="flex-1 flex items-center justify-center py-8">
-        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
-          <div className="text-center space-y-2">
-            <h1 className="text-2xl font-bold text-[#4A2B1D]">สมัครสมาชิกใหม่</h1>
-            <p className="text-xs text-gray-500 leading-relaxed">
-              มาเริ่มต้นค้นพบหนังสือเล่มโปรดไปด้วยกัน
-            </p>
+        {/* Alert Message */}
+        {statusMsg.text && (
+          <div
+            className={`rounded-2xl px-4 py-3 text-xs leading-relaxed border ${
+              statusMsg.type === 'success'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                : 'bg-rose-50 border-rose-200 text-rose-700'
+            }`}
+          >
+            {statusMsg.text}
+          </div>
+        )}
+
+        {/* Form */}
+        <form onSubmit={handleRegister} className="space-y-4 text-xs">
+          <div className="space-y-1.5">
+            <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้</label>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder="กรอกชื่อผู้ใช้"
+              required
+              className={inputClass}
+            />
           </div>
 
-          {statusMsg.text && (
-            <div
-              className={`rounded-2xl px-4 py-3 text-xs leading-relaxed border ${
-                statusMsg.type === 'success'
-                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-                  : 'bg-rose-50 border-rose-200 text-rose-700'
-              }`}
+          <div className="space-y-1.5">
+            <label className="font-semibold block text-[#4A2B1D]">อีเมล</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="กรอกอีเมลของคุณ"
+              required
+              className={inputClass}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="อย่างน้อย 8 ตัวอักษร"
+              required
+              minLength={8}
+              className={inputClass}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="w-full py-3.5 mt-2 bg-[#584237] hover:bg-[#423027] text-white rounded-full font-bold text-sm shadow-sm transition disabled:opacity-50"
+          >
+            {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
+          </button>
+        </form>
+
+        {/* Footer Links */}
+        <div className="text-center text-xs text-[#6E6259] space-y-3.5 pt-2">
+          <p>
+            มีบัญชีอยู่แล้ว?{' '}
+            <Link
+              to="/login"
+              className="text-[#B87D4B] font-bold hover:text-[#8C533A] hover:underline transition"
             >
-              {statusMsg.text}
-            </div>
-          )}
+              เข้าสู่ระบบ
+            </Link>
+          </p>
 
-          <form onSubmit={handleRegister} className="space-y-4 text-xs">
-            <div className="space-y-1.5">
-              <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน</label>
-              <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="ชื่อผู้ใช้งาน"
-                required
-                className={input}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="font-semibold block text-[#4A2B1D]">อีเมล</label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@email.com"
-                required
-                className={input}
-              />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน</label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="อย่างน้อย 8 ตัวอักษร"
-                required
-                minLength={8}
-                className={input}
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2"
+          <div>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 text-xs text-[#6E6259] hover:text-[#4A2B1D] font-medium transition"
             >
-              {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
-            </button>
-          </form>
-
-          <div className="text-center text-xs text-gray-500 pt-2 border-t border-[#F4EFE6]">
-            <p>
-              มีบัญชีแล้ว?{' '}
-              <Link to="/login" className="text-[#8C533A] font-bold hover:underline">
-                เข้าสู่ระบบ
-              </Link>
-            </p>
+              <span>←</span>
+              <span>กลับหน้าหลัก</span>
+            </Link>
           </div>
         </div>
       </div>
-
       <footer className="text-center text-[11px] text-gray-400 py-4">
         © 2026 BookMellow Web Application. All rights reserved.
       </footer>
