@@ -1,48 +1,182 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../auth/AuthContext';
+import { apiRequest } from '../services/api';
 
-// โครงเดียวกับหน้า Login ต่างกันแค่ช่องกรอกและฟังก์ชันที่เรียก
 function Register() {
-  const [displayName, setDisplayName] = useState('');
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(null);
-  const [status, setStatus] = useState('typing');
-  const { register } = useAuth();
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [statusMsg, setStatusMsg] = useState({ type: '', text: '' });
+
   const navigate = useNavigate();
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setStatus('submitting');
-    setError(null);
-    try {
-      await register(email, password, displayName);
-      navigate('/');
-    } catch (err) {
-      setError(err.message);                       // 409 อีเมลซ้ำ หรือ 400 กรอกไม่ครบ ข้อความมาจาก server
-      setStatus('typing');
-    }
-  }
+  const isValidRealEmail = (value) => /^[^\s@]+@[^\s@]+\.[a-zA-Z]{2,}$/.test(value.trim());
 
-  const input = 'w-full rounded-lg border border-slate-300 bg-white px-3 py-2 focus:border-emerald-400 focus:outline-none focus:ring-2 focus:ring-emerald-100';
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setStatusMsg({ type: '', text: '' });
+
+    const trimmedUsername = username.trim();
+    const trimmedEmail = email.trim();
+
+    if (!trimmedUsername) {
+      setStatusMsg({ type: 'error', text: 'กรุณากรอกชื่อผู้ใช้งาน' });
+      return;
+    }
+
+    if (!isValidRealEmail(trimmedEmail)) {
+      setStatusMsg({
+        type: 'error',
+        text: 'กรุณากรอกอีเมลจริงที่ใช้งานได้ (เช่น name@gmail.com) เพื่อรองรับการรีเซ็ตรหัสผ่าน',
+      });
+      return;
+    }
+
+    if (password.length < 6) {
+      setStatusMsg({ type: 'error', text: 'รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร' });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setStatusMsg({ type: 'error', text: 'รหัสผ่านและยืนยันรหัสผ่านไม่ตรงกัน' });
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await apiRequest('/api/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          username: trimmedUsername,
+          email: trimmedEmail,
+          password,
+        }),
+      });
+
+      setStatusMsg({
+        type: 'success',
+        text: 'สมัครสมาชิกสำเร็จแล้ว! กำลังพาคุณไปหน้าเข้าสู่ระบบ...',
+      });
+
+      setTimeout(() => {
+        navigate('/login', { replace: true });
+      }, 1500);
+    } catch (err) {
+      setStatusMsg({
+        type: 'error',
+        text: err.message || 'ไม่สามารถสมัครสมาชิกได้ อีเมลนี้อาจถูกใช้งานแล้ว',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
-    <div className="mx-auto max-w-sm px-4 py-12">
-      <h1 className="text-2xl font-semibold text-slate-900">สมัครสมาชิก</h1>
-      <form onSubmit={handleSubmit} className="mt-6 space-y-3">
-        <input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="ชื่อที่แสดง" required className={input} />
-        <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="อีเมล" required className={input} />
-        <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="รหัสผ่าน (4 ตัวขึ้นไป)" required minLength={4} className={input} />
-        <button type="submit" disabled={status === 'submitting'}
-                className="w-full rounded-lg bg-emerald-500 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-600 disabled:bg-slate-300">
-          {status === 'submitting' ? 'กำลังสมัคร...' : 'สมัครสมาชิก'}
+    <div className="min-h-screen bg-[#FDFBF7] flex flex-col justify-between p-4 text-[#4A2B1D]">
+      <div className="max-w-7xl mx-auto w-full pt-4">
+        <button
+          onClick={() => navigate('/')}
+          className="flex items-center gap-2 text-2xl font-bold text-[#4A2B1D] hover:text-[#8C533A] transition"
+        >
+          📚 <span>BookMellow</span>
         </button>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-      </form>
-      <p className="mt-6 text-sm text-slate-500">
-        มีบัญชีแล้ว? <Link to="/login" className="text-emerald-600 hover:underline">เข้าสู่ระบบ</Link>
-      </p>
+      </div>
+
+      <div className="flex-1 flex items-center justify-center py-8">
+        <div className="w-full max-w-md bg-white rounded-3xl p-8 border border-[#E8DCC4] shadow-sm space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl font-bold text-[#4A2B1D]">สมัครสมาชิกใหม่</h1>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              กรุณาใช้อีเมลจริงที่ใช้งานได้ เพื่อรองรับการยืนยันบัญชีและส่งลิงก์รีเซ็ตรหัสผ่าน
+            </p>
+          </div>
+
+          {statusMsg.text && (
+            <div
+              className={`rounded-2xl px-4 py-3 text-xs leading-relaxed border ${
+                statusMsg.type === 'success'
+                  ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                  : 'bg-rose-50 border-rose-200 text-rose-700'
+              }`}
+            >
+              {statusMsg.text}
+            </div>
+          )}
+
+          <form onSubmit={handleRegister} className="space-y-4 text-xs">
+            <div className="space-y-1">
+              <label className="font-semibold block text-[#4A2B1D]">ชื่อผู้ใช้งาน (Username)</label>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="เช่น blueii"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold block text-[#4A2B1D]">อีเมลจริง (Email)</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="name@gmail.com"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold block text-[#4A2B1D]">รหัสผ่าน (Password)</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="อย่างน้อย 6 ตัวอักษร"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                required
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="font-semibold block text-[#4A2B1D]">ยืนยันรหัสผ่าน</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="กรอกรหัสผ่านอีกครั้ง"
+                className="w-full px-4 py-3 bg-[#F4EFE6] border border-[#E8DCC4] rounded-2xl text-[#4A2B1D] placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-[#8C533A]"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-3 bg-[#8C533A] hover:bg-[#633A27] text-white rounded-2xl font-bold shadow-md transition disabled:opacity-50 mt-2"
+            >
+              {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
+            </button>
+          </form>
+
+          <div className="text-center text-xs text-gray-500 pt-2 border-t border-[#F4EFE6]">
+            <p>
+              มีบัญชีผู้ใช้อยู่แล้ว?{' '}
+              <Link to="/login" className="text-[#8C533A] font-bold hover:underline">
+                เข้าสู่ระบบที่นี่
+              </Link>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <footer className="text-center text-[11px] text-gray-400 py-4">
+        © 2026 BookMellow Web Application. All rights reserved.
+      </footer>
     </div>
   );
 }
